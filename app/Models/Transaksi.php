@@ -18,4 +18,11 @@ class Transaksi extends Model
     public function detail(){
         return $this->hasMany(DetailTransaksi::class);
     }
+
+    public static function boot() {
+        parent::boot();
+        static::deleting(function($transaksi) {
+             $transaksi->detail()->delete();
+        });
+    }
 }

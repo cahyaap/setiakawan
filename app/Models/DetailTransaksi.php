@@ -12,10 +12,10 @@ class DetailTransaksi extends Model
     protected $guarded = [];
 
     public function barang(){
-        return $this->belongsTo(Kategori::class, 'barang_id');
+        return $this->belongsTo(Barang::class, 'barang_id');
     }
 
     public function transaksi(){
-        return $this->belongsTo(Kategori::class, 'transaksi_id');
+        return $this->belongsTo(Transaksi::class, 'transaksi_id');
     }
 }

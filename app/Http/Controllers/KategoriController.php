@@ -8,7 +8,7 @@ use App\Models\Barang;
 
 class KategoriController extends Controller
 {
-    private $title = "Setia Kawan | Daftar Kategori";
+    private $title = "Setia Kawan | Kategori Barang";
     /**
      * Display a listing of the resource.
      *
@@ -17,11 +17,7 @@ class KategoriController extends Controller
     public function index()
     {
         $collection = Kategori::all();
-        $barangs = Barang::select('kategori_id')->groupBy('kategori_id')->get();
-        $kategoriUsed = [];
-        foreach($barangs as $barang){
-            array_push($kategoriUsed, $barang->kategori_id);
-        }
+        $kategoriUsed = Kategori::select('id')->has('barang')->pluck('id')->toArray();
         return view('pages.kategori.index')->with([
             'title' => $this->title,
             'collection' => $collection,

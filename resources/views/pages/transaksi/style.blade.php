@@ -1,6 +1,7 @@
 <style type="text/css">
     .tab-list {
         display: flex;
+        padding-bottom: 20px;
     }
     .tab {
         width: 50%;
@@ -15,22 +16,19 @@
         color: #fff;
         background: #4caf50;
     }
-    .transaksi-button, .transaksi-box {
-        margin: 20px 0;
+    .transaksi-box, .transaksi-button-list button {
+        margin-bottom: 20px;
     }
     .transaksi-box {
         display: none;
     }
-    #tabel-barang-pembelian span {
+    #tabel-barang-transaksi tbody span {
         color: blue;
         cursor: pointer;
-        display: none;
         font-style: italic;
     }
-    .nama-barang-alert {
+    .nama-barang-salah {
         color: red !important;
-        font-style: italic;
-        display: none;
     }
 
     input::-webkit-outer-spin-button,

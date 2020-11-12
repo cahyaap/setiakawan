@@ -17,13 +17,11 @@ class BarangController extends Controller
      */
     public function index()
     {
-        $collection = Barang::with(['kategori'])->orderBy('id', 'desc')->get();
+        $collection = Barang::with(['kategori', 'stok' => function($query) {
+            $query->selectRaw('sum(berat) as berat, jenis, barang_id')->groupBy('barang_id')->groupBy('jenis');
+        }])->orderBy('id', 'desc')->get();
         $categories = Kategori::all();
-        $hargas = Harga::select('barang_id')->groupBy('barang_id')->get();
-        $barangUsed = [];
-        foreach($hargas as $harga){
-            array_push($barangUsed, $harga->barang_id);
-        }
+        $barangUsed = Barang::select('id')->has('harga')->pluck('id')->toArray();
         return view('pages.barang.index')->with([
             'title' => $this->title,
             'collection' => $collection,

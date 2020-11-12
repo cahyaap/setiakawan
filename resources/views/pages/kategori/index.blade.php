@@ -6,7 +6,7 @@
         <div class="white-box">
             <div class="row">
                 <div class="col-md-8">
-                    <h3 class="box-title" style="margin-top: 10px;margin-bottom: -10px">Daftar Kategori</h3>
+                    <h3 class="box-title" style="margin-top: 10px;margin-bottom: -10px">Kategori Barang</h3>
                 </div>
                 <div class="col-md-4">
                     <a style="color:white;" class="pull-right" href="#tambah-kategori">

@@ -72,3 +72,41 @@
 <script type="text/javascript"
     src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
+
+<script type="text/javascript">
+    function getTableData(route, element, columns, params = null){
+        $('.transaksi .load-content').show();
+        $.ajax({
+            url: route,
+            data: params,
+            success: function(res){
+                $('.transaksi .load-content').hide();
+                var tableCreated = $(element).DataTable({
+                    data: res.data,
+                    columns: columns
+                });
+                $(element+" thead tr th").addClass('text-center');
+            }
+        });
+    }
+
+    function getAksiData(route, element, params = null){
+        var jenis = (params.jenis == 1) ? "Pembelian" : "Penjualan";
+        $(element).empty();
+        $('.modal .load-content').show();
+        $.ajax({
+            url: route,
+            data: params,
+            success: function(res){
+                $('.modal .load-content').hide();
+                $(element).append(res);
+                $('.modal .jenis-transaksi-text').empty();
+                $('.modal .jenis-transaksi-text').html(jenis);
+            }
+        });
+    }
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+</script>

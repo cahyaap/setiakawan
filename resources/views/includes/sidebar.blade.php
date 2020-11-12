@@ -19,7 +19,7 @@
             <li>
                 <a href="{{ route('kategori.index') }}" class="waves-effect">
                     <i class="fa fa-tags fa-fw" data-icon="v"></i>
-                    <span class="hide-menu"> Daftar Kategori</span>
+                    <span class="hide-menu"> Kategori Barang</span>
                 </a>
             </li>
             <li>

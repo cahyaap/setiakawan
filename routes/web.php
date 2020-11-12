@@ -14,6 +14,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('harga', 'HargaController');
     Route::resource('transaksi', 'TransaksiController');
 
-    Route::get('/pembelian/addRowPembelian', 'TransaksiController@addRowPembelian')->name('addRowPembelian');
-    Route::get('/pembelian/daftarHarga', 'TransaksiController@daftarHarga')->name('daftarHarga');
+    Route::get('/stok-barang', 'TransaksiController@stokBarang')->name('stok-barang');
+    Route::get('/data-bon', 'TransaksiController@dataBon')->name('dataBon');
+    Route::get('/addRowTransaksi', 'TransaksiController@addRowPembelian')->name('addRowTransaksi');
+    Route::get('/daftarHarga', 'TransaksiController@daftarHarga')->name('daftarHarga');
 });

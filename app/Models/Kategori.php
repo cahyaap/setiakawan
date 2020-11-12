@@ -10,4 +10,8 @@ class Kategori extends Model
     use SoftDeletes;
 
     protected $guarded = [];
+
+    public function barang(){
+        return $this->hasMany(Barang::class, 'kategori_id', 'id');
+    }
 }

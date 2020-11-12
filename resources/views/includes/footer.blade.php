@@ -1,1 +1,1 @@
-<footer class="footer text-center"> Copyright &copy 2020 Setia Kawan | Developed by <a target="_blank" href="https://www.instagram.com/cahyaajipermana">cahyaajipermana</a></footer>
+<footer class="footer text-center"> Copyright &copy 2021 Setia Kawan | Developed by <a target="_blank" href="https://www.instagram.com/cahyaajipermana">cahyaajipermana</a></footer>

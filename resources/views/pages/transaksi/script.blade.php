@@ -3,8 +3,93 @@
 
         $('.select2').select2();
 
-        var pembelian = $('#tabel-pembelian').DataTable();
-        var penjualan = $('#tabel-penjualan').DataTable();
+        var columnsPembelian = [
+            { 
+                title: "#",
+                className: 'text-center'
+            },
+            {
+                title: "Tanggal",
+                className: 'text-center'
+            },
+            {
+                title: "Seller"
+            },
+            {
+                title: "Total",
+                className: 'text-right'
+            },
+            {
+                title: "Keterangan"
+            },
+            {
+                title: "Aksi",
+                className: 'text-center',
+                render: function(data, type, row) {
+                    var detail = "<a class='aksi-btn' href='#detailTransaksi' data-jenis='"+row[6]+"' data-aksi='detail' data-id='"+row[5]+"' data-toggle='modal' data-target='#detailTransaksi'>Detail</a>";
+                    var edit = "<a class='aksi-btn' href='#editTransaksi' data-jenis='"+row[6]+"' data-aksi='edit' data-id='"+row[5]+"' data-toggle='modal' data-target='#editTransaksi'>Edit</a>";
+                    var hapus = "<a class='aksi-btn' href='#hapusTransaksi' data-jenis='"+row[6]+"' data-aksi='hapus' data-id='"+row[5]+"' data-toggle='modal' data-target='#hapusTransaksi'>Hapus</a>";
+                    return detail + " " + edit + " " + hapus
+                }
+            }
+        ];
+
+        var columnsPenjualan = [
+            { 
+                title: "#",
+                className: 'text-center'
+            },
+            {
+                title: "Tanggal",
+                className: 'text-center'
+            },
+            {
+                title: "Seller"
+            },
+            {
+                title: "Total",
+                className: 'text-right'
+            },
+            {
+                title: "Keterangan"
+            },
+            {
+                title: "Aksi",
+                className: 'text-center',
+                render: function(data, type, row) {
+                    var detail = "<a class='aksi-btn' href='#detailTransaksi' data-jenis='"+row[6]+"' data-aksi='detail' data-id='"+row[5]+"' data-toggle='modal' data-target='#detailTransaksi'>Detail</a>";
+                    var edit = "<a class='aksi-btn' href='#editTransaksi' data-jenis='"+row[6]+"' data-aksi='edit' data-id='"+row[5]+"' data-toggle='modal' data-target='#editTransaksi'>Edit</a>";
+                    var hapus = "<a class='aksi-btn' href='#hapusTransaksi' data-jenis='"+row[6]+"' data-aksi='hapus' data-id='"+row[5]+"' data-toggle='modal' data-target='#hapusTransaksi'>Hapus</a>";
+                    return detail + " " + edit + " " + hapus
+                }
+            }
+        ];
+
+        getTableData("{{ route('dataBon') }}", "#tabel-pembelian", columnsPembelian, { jenis: 1 });
+        getTableData("{{ route('dataBon') }}", "#tabel-penjualan", columnsPenjualan, { jenis: 2 });
+
+        $(document).on('click', '.aksi-btn', function(){
+            var _this = $(this);
+            var transaksi_id = _this.data('id');
+            var jenis = _this.data('jenis');
+            var aksi = _this.data('aksi');
+            var route = "";
+            if(aksi === "detail"){
+                route = "{{ route('transaksi.show', 'transaksi_id') }}";
+                route = route.replace('transaksi_id', transaksi_id);
+                getAksiData(route, '#detail-transaksi-data', { jenis: jenis });
+            }
+            if(aksi === "edit"){
+                route = "{{ route('transaksi.edit', 'transaksi_id') }}";
+                route = route.replace('transaksi_id', transaksi_id);
+                getAksiData(route, '#edit-transaksi-data', { jenis: jenis });
+            }
+            if(aksi === "hapus"){
+                route = "{{ route('transaksi.destroy', 'transaksi_id') }}";
+                route = route.replace('transaksi_id', transaksi_id);
+                $('.hapus-transaksi-form').attr('action', route);
+            }
+        });
 
         $('.tab').click(function(){
             var _this = $(this);
@@ -20,22 +105,26 @@
         $('.transaksi-button').click(function(){
             var id = $(this).attr('id');
             var transaksi = $(this).attr('data-transaksi');
-            $('#tabel-'+transaksi+'-box').hide();
-            $('.transaksi-box').hide();
-            $('.transaksi-button').show();
-            $(this).hide();
-            $('#'+id+'-box').show();
-            $('.seller').focus();
+            if (id == 3) {
+                $('#tambah-transaksi-box').hide();
+                $('#tambah-pengeluaran-box').show();
+            } else {
+                $('#tambah-transaksi-box').hide();
+                $('.jenis-transaksi-text').empty();
+                $('.jenis-transaksi-text').html(capitalizeFirstLetter(transaksi));
+                $('#tambah-transaksi-box').show();
+                $('.seller').focus();
+                $('#jenis').val(id);
+            }
         });
 
         $('.batal-bon-button').click(function(){
             var transaksi = $(this).attr('data-transaksi');
             $('.transaksi-box').hide();
-            $('.transaksi-button').show();
-            $('#tabel-'+transaksi+'-box').show();
+            $('.transaksi-button-list').show();
         });
 
-        $('#tambah-data-pembelian').click(function(){
+        $('#tambah-data-transaksi').click(function(){
             var _this = $(this);
             _this.hide();
             $('.spinner').show();
@@ -43,14 +132,14 @@
             var nextId = parseInt(lastId) + 1;
             _this.attr('last-id', nextId);
             $.ajax({
-                url: '/pembelian/addRowPembelian',
+                url: '/addRowTransaksi',
                 data: {
                     row_id: nextId
                 },
                 success: function(res){
                     $('.spinner').hide();
                     _this.show();
-                    $('#row-barang-pembelian').append(res);
+                    $('#row-barang-transaksi').append(res);
                 }
             });
         });
@@ -66,8 +155,6 @@
             var _this = $(this);
             var idBaris = splitIdBaris(_this);
             var namaBarang = _this.val();
-            $('#daftar-harga-'+idBaris).show();
-            $('#daftar-harga-'+idBaris).attr('nama-barang', namaBarang);
             $('#harga-'+idBaris).attr('required', 'required');
             $('#kg-'+idBaris).attr('required', 'required');
 
@@ -82,21 +169,34 @@
                 }
                 var barang_id = obj.data('id');
                 $('#barang-id-'+idBaris).val(barang_id);
-                $('#nama-barang-'+idBaris+'-alert').hide();
+                $.ajax({
+                    url: "{{ route('stok-barang') }}",
+                    data: {
+                        barang_id: barang_id
+                    },
+                    success: function(res){
+                        $('#nama-barang-'+idBaris+'-alert').removeClass('nama-barang-salah');
+                        $('#nama-barang-'+idBaris+'-alert').html("Stok saat ini: <strong>"+res.stok+" kg</strong>");
+                    }
+                });
+                $('#daftar-harga-'+idBaris).html("Lihat daftar harga");
+                $('#daftar-harga-'+idBaris).attr('nama-barang', namaBarang);
             }else{
                 namaBarangAlertCounter++;
                 $('#buat-bon-button').attr('disabled', 'disabled');
-                $('#nama-barang-'+idBaris+'-alert').show();
+                $('#nama-barang-'+idBaris+'-alert').html("Nama barang tidak ada");
+                $('#nama-barang-'+idBaris+'-alert').addClass('nama-barang-salah');
+                $('#daftar-harga-'+idBaris).empty();
             }
         });
 
-        var totalPembelian = 0;
-        var totalBeratPembelian = 0;
-        var kasPembelian = 0;
-        var tfPembelian = 0;
-        var dpPembelian = 0;
-        var hutangPembelian = 0;
-        var sisaPembelian = 0;
+        var total = 0;
+        var totalBerat = 0;
+        var kas = 0;
+        var tf = 0;
+        var dp = 0;
+        var hutang = 0;
+        var sisa = 0;
 
         function updateTotal(element, result){
             var total = 0;
@@ -115,9 +215,9 @@
             var harga = _this.val();
             var berat = $('#kg-'+idBaris).val();
             $('#total-'+idBaris).val(harga * berat);
-            totalPembelian = updateTotal('.total-barang', '#total-pembelian');
-            totalBeratPembelian = updateTotal('.berat-barang', '#total-berat');
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            total = updateTotal('.total-barang', '#total-transaksi');
+            totalBerat = updateTotal('.berat-barang', '#total-berat');
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
 
         $(document).on('keyup', '.berat-barang', function(){
@@ -126,9 +226,9 @@
             var berat = _this.val();
             var harga = $('#harga-'+idBaris).val();
             $('#total-'+idBaris).val(harga * berat);
-            totalPembelian = updateTotal('.total-barang', '#total-pembelian');
-            totalBeratPembelian = updateTotal('.berat-barang', '#total-berat');
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            total = updateTotal('.total-barang', '#total-transaksi');
+            totalBerat = updateTotal('.berat-barang', '#total-berat');
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
 
         $(document).on('click', '.daftar-harga', function(){
@@ -154,23 +254,23 @@
         }
 
         $(document).on('keyup', '#kas', function(){
-            kasPembelian = $(this).val();
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            kas = $(this).val();
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
 
         $(document).on('keyup', '#transfer', function(){
-            tfPembelian = $(this).val();
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            tf = $(this).val();
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
 
         $(document).on('keyup', '#dp', function(){
-            dpPembelian = $(this).val();
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            dp = $(this).val();
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
         
         $(document).on('keyup', '#hutang', function(){
-            hutangPembelian = $(this).val();
-            sisaPembelian = updateSisa(totalPembelian, kasPembelian, tfPembelian, dpPembelian, hutangPembelian);
+            hutang = $(this).val();
+            sisa = updateSisa(total, kas, tf, dp, hutang);
         });
     });
 </script>
