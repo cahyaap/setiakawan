@@ -1,6 +1,11 @@
 <div class="col-md-12">
-    <h3 class="box-title">Bon <span class="jenis-transaksi-text"></span></h3>
     <div class="row">
+        <div class="col-md-12">
+            <h3 class="box-title">
+                Bon <span class="jenis-transaksi-text"></span> - {{ $transaksi[0]->kode }}
+                <a class='btn btn-success pull-right' alt='Print' title='Print' href='#printTransaksi' data-jenis='"+row[6]+"' data-aksi='print' data-id='{{ $transaksi[0]->id }}'><span><i class='fa fa-print'></i></span> Print</a>
+            </h3>
+        </div>
         <div class="col-md-12">
             <div class="form-group table-responsive">
                 <table class="table table-hover">
@@ -86,7 +91,7 @@
                         </tr>
                         <tr>
                             <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang</th>
-                            <td class="text-right">progress</td>
+                            <td class="text-right">{{ number_format($transaksi[0]->sisa_hutang, 0) }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -97,5 +102,4 @@
             </div>
         </div>
     </div>
-    <hr>
 </div>

@@ -18,6 +18,7 @@ class CreateBarangsTable extends Migration
             $table->integer('kategori_id');
             $table->string('kode');
             $table->string('name');
+            $table->decimal('stok', 10, 2)->default(0);
             $table->text('ket')->nullable();
             $table->softDeletes();
             $table->timestamps();

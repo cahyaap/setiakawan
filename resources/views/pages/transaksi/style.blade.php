@@ -22,12 +22,12 @@
     .transaksi-box {
         display: none;
     }
-    #tabel-barang-transaksi tbody span {
+    #tabel-barang-transaksi tbody span, .seller-alert {
         color: blue;
         cursor: pointer;
         font-style: italic;
     }
-    .nama-barang-salah {
+    .nama-barang-salah, .seller-alert {
         color: red !important;
     }
 

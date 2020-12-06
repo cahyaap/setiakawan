@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Barang extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
     protected $guarded = [];
 
@@ -21,5 +21,9 @@ class Barang extends Model
 
     public function stok(){
         return $this->hasMany(DetailTransaksi::class, 'barang_id', 'id');
+    }
+
+    public function stokOpname(){
+        return $this->hasMany(DetailStokOpname::class, 'barang_id', 'id');
     }
 }

@@ -1,16 +1,18 @@
-<div class="col-md-12">
-    <h3 class="box-title">Bon <span class="jenis-transaksi-text"></span></h3>
+<div class="col-md-12 bon-transaksi">
+    <h3 class="box-title">Bon <span class="jenis-transaksi-text"></span> - {{ $kode }}</h3>
     <hr>
     <form id="bon-transaksi" method="POST" action="{{ route('transaksi.store') }}">
         @csrf
         <input type="hidden" name="jenis" id="jenis">
+        <input type="hidden" name="kode" id="kode" value="{{ $kode }}">
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="seller">Seller</label>
-                    <input type="text" list="daftar-seller" name="seller" id="seller" placeholder="Tulis nama seller disini..." required class="form-control seller"/>
+                    <input type="text" list="daftar-seller" name="seller" id="seller" onchange="sellerExist(this)" placeholder="Tulis nama seller disini..." required class="form-control seller"/>
+                    <span class="seller-alert"></span>
                     <datalist id="daftar-seller">
-                        @foreach ($sellers[0] as $item)
+                        @foreach ($sellers as $item)
                         <option value="{{ $item->name }}">
                         @endforeach
                     </datalist>
@@ -55,7 +57,7 @@
                         <tfoot>
                             <tr>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-success btn-warning" last-id="{{ $totalData-1 }}" id="tambah-data-transaksi"><i class="fa fa-plus"></i></button>
+                                    <button onclick="addNewRow(this, '#tabel-barang-transaksi .spinner', '#row-barang-transaksi')" type="button" class="btn btn-success btn-warning" last-id="{{ $totalData-1 }}" id="tambah-data-transaksi"><i class="fa fa-plus"></i></button>
                                     <span style="display: none;" class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                                 </td>
                                 <th colspan="2" style="vertical-align: middle;" class="text-center">Total <span class="jenis-transaksi-text"></span></th>
@@ -77,7 +79,7 @@
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">Hutang</td>
-                                <td><input type="number" min="0" name="hutang" id="hutang" class="form-control text-right"></td>
+                                <td><input type="number" min="0" name="hutang" id="hutang" onkeyup="updateSisaHutang(this.value)" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Pembayaran</th>
@@ -85,7 +87,10 @@
                             </tr>
                             <tr>
                                 <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang</th>
-                                <td><input type="number" min="0" name="sisa_hutang" id="sisa-hutang" readonly class="form-control text-right"></td>
+                                <td>
+                                    <input type="number" min="0" name="sisa_hutang" id="sisa-hutang" readonly class="form-control text-right">
+                                    <input type="hidden" min="0" name="sisa_hutang_temp" id="sisa-hutang-temp">
+                                </td>
                             </tr>
                         </tfoot>
                     </table>

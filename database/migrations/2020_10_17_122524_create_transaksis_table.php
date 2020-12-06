@@ -15,6 +15,7 @@ class CreateTransaksisTable extends Migration
     {
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
+            $table->string('kode');
             $table->integer('seller_id');
             $table->integer('jenis');
             $table->bigInteger('kas')->default(0);
@@ -22,6 +23,7 @@ class CreateTransaksisTable extends Migration
             $table->bigInteger('dp')->default(0);
             $table->bigInteger('hutang')->default(0);
             $table->bigInteger('sisa')->default(0);
+            $table->bigInteger('sisa_hutang')->default(0);
             $table->text('ket')->nullable();
             $table->softDeletes();
             $table->timestamps();

@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaksi extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
     protected $guarded = [];
 
@@ -17,6 +17,10 @@ class Transaksi extends Model
 
     public function detail(){
         return $this->hasMany(DetailTransaksi::class);
+    }
+
+    public function retur(){
+        return $this->hasOne(Retur::class, 'transaksi_id', 'id');
     }
 
     public static function boot() {

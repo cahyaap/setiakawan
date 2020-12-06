@@ -15,7 +15,9 @@ class CreateHutangsTable extends Migration
     {
         Schema::create('hutangs', function (Blueprint $table) {
             $table->id();
-            $table->string('seller_id');
+            $table->integer('seller_id');
+            $table->string('tipe');
+            $table->string('jenis');
             $table->bigInteger('jumlah')->default(0);
             $table->softDeletes();
             $table->timestamps();

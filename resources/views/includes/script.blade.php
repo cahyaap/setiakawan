@@ -74,15 +74,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/dropzone.js"></script>
 
 <script type="text/javascript">
-    function getTableData(route, element, columns, params = null){
-        $('.transaksi .load-content').show();
+    function getTableData(route, element, columns, params = null, order = null){
+        var orderColumn = [[0, "asc"]];
+        if(order){
+            orderColumn = order;
+        }
+        $('.load-content').show();
         $.ajax({
             url: route,
             data: params,
             success: function(res){
-                $('.transaksi .load-content').hide();
+                $('.load-content').hide();
                 var tableCreated = $(element).DataTable({
                     data: res.data,
+                    order: orderColumn,
                     columns: columns
                 });
                 $(element+" thead tr th").addClass('text-center');
@@ -90,8 +95,38 @@
         });
     }
 
-    function getAksiData(route, element, params = null){
+    function getBon(route, element, params = null){
         var jenis = (params.jenis == 1) ? "Pembelian" : "Penjualan";
+        $(element).show();
+        removeBon('.bon-transaksi');
+        $(element+' .load-content').show();
+        $.ajax({
+            url: route,
+            data: params,
+            success: function(res){
+                $(element+' .load-content').hide();
+                $(element).append(res);
+                $(element+' .jenis-transaksi-text').empty();
+                $(element+' .jenis-transaksi-text').html(jenis);
+                $('.seller').focus();
+                $('#jenis').val(params.jenis);
+                if(params.transaksi_id){
+                    var route = "{{ route('transaksi.update', 'transaksi_id') }}";
+                    route = route.replace('transaksi_id', params.transaksi_id);
+                    $('#update-bon-transaksi').attr('action', route);
+                }
+            }
+        });
+    }
+
+    function removeBon(bonEl){
+        $(bonEl).remove();
+    }
+
+    function getAksiData(route, element, params = null){
+        if(params){
+            var jenis = (params.jenis == 1) ? "Pembelian" : "Penjualan";
+        }
         $(element).empty();
         $('.modal .load-content').show();
         $.ajax({
@@ -106,7 +141,159 @@
         });
     }
 
+    function sellerExist(e){
+        $('.seller-alert').empty();
+        $.ajax({
+            url: "{{ route('seller-exist') }}",
+            data: { name: e.value },
+            success: function(res){
+                if(res.seller == 0){
+                    $('.seller-alert').append("Data seller belum ada di database, akan dimasukkan sebagai data seller baru");
+                }
+                getHutangBySeller(e.value);
+            }
+        });
+    }
+
+    function transaksiExist(e){
+        $('.transaksi-alert').empty();
+        $.ajax({
+            url: "{{ route('transaksi-exist') }}",
+            data: { kode_transaksi: e.value },
+            success: function(res){
+                if(res.transaksi.length == 0){
+                    $('.transaksi-alert').append("Data transaksi tidak ditemukan di database");
+                    $('.submit-retur-btn').attr('disabled', 'disabled');
+                }else{
+                    var transaksi_id = res.transaksi[0].id;
+                    var jenis = res.transaksi[0].jenis;
+                    var html = "<a class='aksi-btn detail-btn' alt='Detail' title='Detail' href='#detailTransaksi' data-aksi='detail-transaksi' data-transaksi-id='"+transaksi_id+"' data-jenis='"+jenis+"' data-toggle='modal' data-target='#detailTransaksi'>Detail Transaksi</a>";
+                    $('.transaksi-alert').append(html);
+                    $('#transaksi-id').val(transaksi_id);
+                    $('.submit-retur-btn').removeAttr('disabled');
+                }
+            }
+        });
+    }
+
+    function getHutangBySeller(name){
+        var jenisTransaksi = $('#jenis').val();
+        var tipeHutang = (jenisTransaksi == 1) ? "Hutang" : "Piutang";
+        $('#sisa-hutang, #sisa-hutang-temp').val(0);
+        $.ajax({
+            url: "{{ route('get-hutang-by-seller') }}",
+            data: { name: name, tipe: tipeHutang },
+            success: function(res){
+                $('#sisa-hutang, #sisa-hutang-temp').val(res.hutang);
+            }
+        });
+    }
+
+    function updateSisaHutang(pembayaranHutang){
+        var sisaHutangTemp = $('#sisa-hutang-temp').val();
+        var sisaHutang = $('#sisa-hutang').val();
+        if(sisaHutang > 0){
+            sisaHutang = sisaHutangTemp - pembayaranHutang;
+        }
+        $('#sisa-hutang').val(sisaHutang);
+    }
+
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function addNewRow(_this, spinner, target){
+        var id = _this.getAttribute('id');
+        $('#'+id).hide();
+        $(spinner).show();
+        var lastId = _this.getAttribute('last-id');
+        var nextId = parseInt(lastId) + 1;
+        $('#'+id).attr('last-id', nextId);
+        $.ajax({
+            url: "{{ route('add-row-transaksi') }}",
+            data: {
+                row_id: nextId
+            },
+            success: function(res){
+                $(spinner).hide();
+                $('#'+id).show();
+                $(target).append(res);
+            }
+        });
+    }
+
+    function splitIdBaris(_this){
+        var id = _this.split('-');
+        var idBaris = id[1];
+        return idBaris;
+    }
+
+    function updateTotal(element, result){
+        var total = 0;
+        var arr = $(element);
+        for(var i=0;i<arr.length;i++){
+            if(parseInt(arr[i].value))
+            total += parseInt(arr[i].value);
+        }
+        $(result).val(parseInt(total));
+        return total;
+    }
+
+    function updateSisa(total, kas, tf, dp, hutang){
+        var total = ($('#total-transaksi').val() == "") ? 0 : $('#total-transaksi').val();
+        var kas = ($('#kas').val() == "") ? 0 : $('#kas').val();
+        var tf = ($('#transfer').val() == "") ? 0 : $('#transfer').val();
+        var dp = ($('#dp').val() == "") ? 0 : $('#dp').val();
+        var hutang = ($('#hutang').val() == "") ? 0 : $('#hutang').val();
+        var sisa = ($('#sisa').val() == "") ? 0 : $('#sisa').val();
+        var sisa = total - kas - tf - dp - hutang;
+        $('#sisa').val(sisa);
+        return sisa;
+    }
+
+    function bonInputCheck(formButton, idBaris, obj, namaBarang, namaBarangAlertCounter)
+    {
+        if(obj != null && obj.length > 0) {
+            if (namaBarangAlertCounter > 0) {
+                namaBarangAlertCounter--;
+            }
+            if (namaBarangAlertCounter == 0){
+                $('#buat-bon-button').removeAttr('disabled');
+            }
+            var barang_id = obj.data('id');
+            $('#barang-id-'+idBaris).val(barang_id);
+            $.ajax({
+                url: "{{ route('stok-barang') }}",
+                data: {
+                    barang_id: barang_id
+                },
+                success: function(res){
+                    $('#nama-barang-'+idBaris+'-alert').removeClass('nama-barang-salah');
+                    $('#nama-barang-'+idBaris+'-alert').html("Stok saat ini: <strong>"+res.stok+" kg</strong>");
+                }
+            });
+            $('#daftar-harga-'+idBaris).html("Lihat daftar harga");
+            $('#daftar-harga-'+idBaris).attr('nama-barang', namaBarang);
+        }else{
+            namaBarangAlertCounter++;
+            $('#buat-bon-button').attr('disabled', 'disabled');
+            $('#nama-barang-'+idBaris+'-alert').html("Nama barang tidak ada");
+            $('#nama-barang-'+idBaris+'-alert').addClass('nama-barang-salah');
+            $('#daftar-harga-'+idBaris).empty();
+        }
+
+        return namaBarangAlertCounter;
+    }
+
+    function addCommas(nStr){
+        nStr += '';
+        x = nStr.split('.');
+        x1 = x[0];
+        x2 = x.length > 1 ? '.' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + ',' + '$2');
+        }
+        return x1 + x2;
     }
 </script>

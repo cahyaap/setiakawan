@@ -8,7 +8,7 @@
 </style>
 
 @section('content')
-<div class="row">
+<div class="animated fadeIn row">
     <div class="col-sm-12">
         <div class="white-box">
             <div class="row">
@@ -40,32 +40,18 @@
                                 $i = 1;
                             @endphp
                             @foreach ($collection as $item)
-                                @php
-                                    $beli = 0;
-                                    $jual = 0;
-                                @endphp
-                                @foreach ($item->stok as $stok)
-                                    @php
-                                        if($stok->jenis == 1){
-                                            $beli = $beli + $stok->berat;
-                                        }
-                                        if($stok->jenis == 2){
-                                            $jual = $jual + $stok->berat;
-                                        }
-                                    @endphp
-                                @endforeach
                             <tr>
                                 <td>{{ $item->kategori->name }}</td>
                                 <td>{{ $item->kode }}</td>
                                 <td>{{ $item->name }}</td>
-                                <td class="text-center">{{ number_format($beli - $jual, 2) }}</td>
+                                <td class="text-center">{{ number_format($item->stok, 2) }}</td>
                                 {{-- <td>{{ $item->ket }}</td> --}}
                                 <td class="text-center">
                                     <a href="#" class="editBarangButton" data-toggle="modal" data-target="#editBarang" data-id="{{ $item->id }}" data-name="{{ $item->name }}" data-kategori-id="{{ $item->kategori_id }}" data-kode="{{ $item->kode }}" data-ket="{{ $item->ket }}" data-used="<?= (in_array($item->id, $barangUsed)) ? true : false ?>">Edit</a>
                                     @if (!in_array($item->id, $barangUsed))
                                     <a href="#" class="hapusBarangButton" data-toggle="modal" data-target="#hapusBarang" data-id="{{ $item->id }}" data-name="{{ $item->name }}">Hapus</a>
                                     @endif
-                                </tr>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

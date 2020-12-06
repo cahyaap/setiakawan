@@ -1,7 +1,7 @@
 @extends('layouts.default')
 
 @section('content')
-<div class="row">
+<div class="animated fadeIn row">
     <div class="col-sm-12">
         <div class="white-box">
             <div class="row">
@@ -38,13 +38,13 @@
                                 <td>{{ $item->barang->kategori->name }}</td>
                                 <td>{{ $item->barang->kode }}</td>
                                 <td>{{ $item->barang->name }}</td>
-                                <td class="text-right">{{ "Rp. ".number_format($item->beli, 0) }}</td>
-                                <td class="text-right">{{ "Rp. ".number_format($item->jual, 0) }}</td>
+                                <td class="text-right">{{ number_format($item->beli, 0) }}</td>
+                                <td class="text-right">{{ number_format($item->jual, 0) }}</td>
                                 <td>{{ $item->ket }}</td>
                                 <td class="text-center">
                                     <a href="#" class="editHargaButton" data-toggle="modal" data-target="#editHarga" data-id="{{ $item->id }}" data-beli="{{ $item->beli }}" data-barang-id="{{ $item->barang_id }}" data-jual="{{ $item->jual }}" data-ket="{{ $item->ket }}">Edit</a>
                                     <a href="#" class="hapusHargaButton" data-toggle="modal" data-target="#hapusHarga" data-id="{{ $item->id }}" data-name="{{ $item->barang->name }}">Hapus</a>
-                                </tr>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

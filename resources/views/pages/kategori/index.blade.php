@@ -1,7 +1,7 @@
 @extends('layouts.default')
 
 @section('content')
-<div class="row">
+<div class="animated fadeIn row">
     <div class="col-sm-12">
         <div class="white-box">
             <div class="row">
@@ -40,7 +40,7 @@
                                     @else
                                     <small style="font-style: italic;">Data sedang digunakan</small>
                                     @endif
-                                </tr>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
