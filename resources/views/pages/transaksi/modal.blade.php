@@ -128,7 +128,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="kas">Nominal</label>
-                                <input type="number" name="nominal" id="nominal" class="form-control" placeholder="Masukkan jumlah pengeluaran disini..." required>
+                                <input type="text" name="nominal" id="nominal" class="form-control" placeholder="Masukkan jumlah pengeluaran disini..." required>
                             </div>
                             <div class="form-group">
                                 <label for="ket">Keterangan</label>
@@ -171,7 +171,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="kas">Nominal</label>
-                                <input type="number" name="nominal" id="edit-nominal" class="form-control" placeholder="Masukkan jumlah pengeluaran disini..." required>
+                                <input type="text" name="nominal" id="edit-nominal" class="form-control" placeholder="Masukkan jumlah pengeluaran disini..." required>
                             </div>
                             <div class="form-group">
                                 <label for="ket">Keterangan</label>

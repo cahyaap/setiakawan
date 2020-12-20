@@ -82,9 +82,22 @@
             </li>
             <li class="devider"></li>
             <li>
-                <a href="{{ route('absensi.index') }}" class="waves-effect">
+                <a href="{{ route('karyawan.index') }}" class="waves-effect">
                     <i style="font-size: 16px;" class="fa fa-users fa-fw" data-icon="v"></i>
+                    <span class="hide-menu"> Karyawan</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('absensi.index') }}" class="waves-effect">
+                    <i style="font-size: 16px;" class="fa fa-calendar fa-fw" data-icon="v"></i>
                     <span class="hide-menu"> Absensi</span>
+                </a>
+            </li>
+            <li class="devider"></li>
+            <li>
+                <a href="{{ route('profil.index') }}" class="waves-effect">
+                    <i style="font-size: 16px;" class="fa fa-gear fa-fw" data-icon="v"></i>
+                    <span class="hide-menu"> Profil</span>
                 </a>
             </li>
             <li class="devider"></li>

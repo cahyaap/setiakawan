@@ -11,6 +11,9 @@ use App\Models\Seller;
 use App\Models\Transaksi;
 use App\Models\Hutang;
 use App\Models\Pengeluaran;
+use App\Models\Profile;
+
+use PDF;
 
 class TransaksiController extends Controller
 {
@@ -41,10 +44,12 @@ class TransaksiController extends Controller
      */
     public function create(Request $request)
     {
-        $sellers = Seller::all();
         $barangs = Barang::with(['kategori'])->orderBy('name', 'asc')->get();
 
         $jenis = $request->input('jenis');
+
+        $sellers = Seller::where('jenis', $jenis)->get();
+
         if($jenis == 1){ $kode = "SKPB"; }
         if($jenis == 2){ $kode = "SKPJ"; }
         $lastTransaksi = Transaksi::where('kode', 'LIKE', "%$kode%")
@@ -61,7 +66,8 @@ class TransaksiController extends Controller
         return view('pages.transaksi.bon')->with([
             'barangs' => $barangs,
             'sellers' => $sellers,
-            'kode' => $kode
+            'kode' => $kode,
+            'jenis' => $jenis
         ]);
     }
 
@@ -73,75 +79,117 @@ class TransaksiController extends Controller
      */
     public function store(Request $request)
     {
-        $jenis = $request->input('jenis');
-        
-        $transaksi = [
-            'kode' => $request->input('kode'),
-            'jenis' => $jenis,
-            'kas' => (empty($request->input('kas'))) ? 0 : $request->input('kas'),
-            'tf' => (empty($request->input('transfer'))) ? 0 : $request->input('transfer'),
-            'dp' => (empty($request->input('dp'))) ? 0 : $request->input('dp'),
-            'hutang' => (empty($request->input('hutang'))) ? 0 : $request->input('hutang'),
-            'sisa' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa'),
-            'sisa_hutang' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa_hutang'),
-            'ket' => $request->input('ket')
-        ];
-
-        // check seller
-        $name = ucwords(trim($request->input('seller')));
-        $seller = Seller::where('name', $name)->where('jenis', $transaksi['jenis'])->get();
-        if(count($seller) == 0) {
-            $sellerCreated = Seller::create([
-                'name' =>  $name,
-                'jenis' => $transaksi['jenis']
-            ]);
-        }
-
-        $transaksi['seller_id'] = (count($seller) == 0) ? $sellerCreated->id : $seller[0]->id;
-
-        // update hutang jika pembayaran menggunakan hutang
-        if($request->input('hutang') > 0){
-            $data = [
-                'seller_id' => $transaksi['seller_id'],
-                'tipe' => 'Hutang',
-                'jenis' => 'Debit',
-                'jumlah' => $request->input('hutang')
-            ];
-            Hutang::create($data);
-        }
-
-        $createdTransaksi = Transaksi::create($transaksi);
-
-        // create detail transaksi
-        $detailTransaksi = [];
         $barangs = $request->input('barang_id');
         $hargas = $request->input('harga');
         $berats = $request->input('kg');
-        for($i=0;$i<count($barangs);$i++){
-            if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
-                array_push($detailTransaksi, [
-                    'transaksi_id' => $createdTransaksi->id,
-                    'barang_id' => $barangs[$i],
-                    'harga' => $hargas[$i],
-                    'berat' => $berats[$i],
-                    'jenis' => $transaksi['jenis'],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
 
-                // update stok barang
-                $barang = Barang::find($barangs[$i]);
-                if($jenis == 1){
-                    $barang->stok = $barang->stok + $berats[$i];
-                }
-                if($jenis == 2){
-                    $barang->stok = $barang->stok - $berats[$i];
-                }
-                $barang->save();
+        if(count($barangs) > 0 && count($hargas) > 0 && count($berats) > 0){
+
+            $jenis = $request->input('jenis');
+            
+            $transaksi = [
+                'kode' => $request->input('kode'),
+                'jenis' => $jenis,
+                'kas' => (empty($request->input('kas'))) ? 0 : str_replace(",", "", $request->input('kas')),
+                'tf' => (empty($request->input('transfer'))) ? 0 : str_replace(",", "", $request->input('transfer')),
+                'dp' => (empty($request->input('dp'))) ? 0 : str_replace(",", "", $request->input('dp')),
+                'hutang' => (empty($request->input('hutang'))) ? 0 : str_replace(",", "", $request->input('hutang')),
+                'transaksi' => (empty($request->input('transaksi'))) ? 0 : str_replace(",", "", $request->input('transaksi')),
+                'sisa' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa'),
+                'sisa_hutang' => (empty($request->input('sisa_hutang'))) ? 0 : $request->input('sisa_hutang'),
+                'sisa_dp' => (empty($request->input('sisa_dp'))) ? 0 : $request->input('sisa_dp'),
+                'ket' => $request->input('ket')
+            ];
+
+            // check seller
+            $name = ucwords(trim($request->input('seller')));
+            $seller = Seller::where('name', $name)->where('jenis', $transaksi['jenis'])->get();
+            if(count($seller) == 0) {
+                $sellerCreated = Seller::create([
+                    'name' =>  $name,
+                    'jenis' => $transaksi['jenis']
+                ]);
             }
+
+            $transaksi['seller_id'] = (count($seller) == 0) ? $sellerCreated->id : $seller[0]->id;
+
+            $createdTransaksi = Transaksi::create($transaksi);
+
+            // update hutang jika pembayaran menggunakan hutang
+            if(str_replace(",", "", $request->input('hutang')) > 0){
+                $data = [
+                    'seller_id' => $transaksi['seller_id'],
+                    'transaksi_id' => $createdTransaksi->id,
+                    'tipe' => 'Bayar',
+                    'jenis' => 'Hutang',
+                    'jumlah' => str_replace(",", "", $request->input('hutang')),
+                    'ket' => 'Bayar pembelian dengan hutang'
+                ];
+                Hutang::create($data);
+            }
+
+            // update dp jika pembayaran menggunakan dp
+            if(str_replace(",", "", $request->input('dp')) > 0){
+                $data = [
+                    'seller_id' => $transaksi['seller_id'],
+                    'transaksi_id' => $createdTransaksi->id,
+                    'tipe' => 'Bayar',
+                    'jenis' => 'DP',
+                    'jumlah' => str_replace(",", "", $request->input('dp')),
+                    'ket' => 'Bayar pembelian dengan DP'
+                ];
+                Hutang::create($data);
+            }
+
+            // create detail transaksi
+            $detailTransaksi = [];
+            for($i=0;$i<count($barangs);$i++){
+                if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
+                    array_push($detailTransaksi, [
+                        'transaksi_id' => $createdTransaksi->id,
+                        'barang_id' => $barangs[$i],
+                        'harga' => str_replace(",", "", $hargas[$i]),
+                        'berat' => $berats[$i],
+                        'jenis' => $transaksi['jenis'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // update or create daftar harga barang
+                    if($transaksi['jenis'] == 1){ // beli
+                        Harga::updateOrCreate([
+                            "barang_id" => $barangs[$i],
+                            "beli" => str_replace(",", "", $hargas[$i]),
+                            "ket" => $name
+                        ],[
+                            "jual" => 0
+                        ]);
+                    }
+                    if($transaksi['jenis'] == 2){ // jual
+                        Harga::updateOrCreate([
+                            "barang_id" => $barangs[$i],
+                            "jual" => str_replace(",", "", $hargas[$i]),
+                            "ket" => $name
+                        ],[
+                            "beli" => 0
+                        ]);
+                    }
+
+                    // update stok barang
+                    $barang = Barang::find($barangs[$i]);
+                    if($jenis == 1){
+                        $barang->stok = $barang->stok + $berats[$i];
+                    }
+                    if($jenis == 2){
+                        $barang->stok = $barang->stok - $berats[$i];
+                    }
+                    $barang->save();
+                }
+            }
+            
+            DetailTransaksi::insert($detailTransaksi);
+
         }
-        
-        DetailTransaksi::insert($detailTransaksi);
 
         return redirect()->route('transaksi.index');
     }
@@ -171,7 +219,8 @@ class TransaksiController extends Controller
     {
         $transaksi = Transaksi::with(['seller', 'detail.barang'])->where('id', $id)->get();   
         $barangs = Barang::with(['kategori'])->orderBy('name', 'asc')->get();
-        $sellers = Seller::all();   
+        
+        $sellers = Seller::where('jenis', $transaksi[0]->jenis)->get();
 
         return view('pages.transaksi.edit-transaksi')->with([
             'transaksi' => $transaksi,
@@ -189,82 +238,136 @@ class TransaksiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $jenis = $request->input('jenis');
-
-        $transaksi = [
-            'jenis' => $jenis,
-            'kas' => (empty($request->input('kas'))) ? 0 : $request->input('kas'),
-            'tf' => (empty($request->input('transfer'))) ? 0 : $request->input('transfer'),
-            'dp' => (empty($request->input('dp'))) ? 0 : $request->input('dp'),
-            'hutang' => (empty($request->input('hutang'))) ? 0 : $request->input('hutang'),
-            'sisa' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa'),
-            'sisa_hutang' => (empty($request->input('sisa_hutang'))) ? 0 : $request->input('sisa_hutang'),
-            'ket' => $request->input('ket')
-        ];
-
-        // check seller
-        $name = ucwords(trim($request->input('seller')));
-        $seller = Seller::where('name', $name)->where('jenis', $transaksi['jenis'])->get();
-        if(count($seller) == 0) {
-            $sellerCreated = Seller::create([
-                'name' =>  $name,
-                'jenis' => $transaksi['jenis']
-            ]);
-        }
-
-        $transaksi['seller_id'] = (count($seller) == 0) ? $sellerCreated->id : $seller[0]->id;
-
-        // update transaksi
-        Transaksi::where('id', $id)->update($transaksi);
-
-        // delete old detail transaksi
-        $detailTransaksiToDelete = DetailTransaksi::where('transaksi_id', $id)->get();
-        foreach($detailTransaksiToDelete as $detail)
-        {
-            // update stok ke stok awal sebelum transaksi
-            $barang = Barang::find($detail->barang_id);
-            if($jenis == 1){
-                $barang->stok = $barang->stok - $detail->berat;
-            }
-            if($jenis == 2){
-                $barang->stok = $barang->stok + $detail->berat;
-            }
-            $barang->save();
-
-            $deleteDetail = DetailTransaksi::find($detail->id);
-            $deleteDetail->delete();
-        }
-
-        // recreate detail transaksi
-        $detailTransaksi = [];
+        
         $barangs = $request->input('barang_id');
         $hargas = $request->input('harga');
         $berats = $request->input('kg');
-        for($i=0;$i<count($barangs);$i++){
-            if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
-                array_push($detailTransaksi, [
-                    'transaksi_id' => $id,
-                    'barang_id' => $barangs[$i],
-                    'harga' => $hargas[$i],
-                    'berat' => $berats[$i],
-                    'jenis' => $transaksi['jenis'],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+        
+        if(count($barangs) > 0 && count($hargas) > 0 && count($berats) > 0){
 
-                // update stok barang
-                $barang = Barang::find($barangs[$i]);
+            $jenis = $request->input('jenis');
+
+            $transaksi = [
+                'jenis' => $jenis,
+                'kas' => (empty($request->input('kas'))) ? 0 : str_replace(",", "", $request->input('kas')),
+                'tf' => (empty($request->input('transfer'))) ? 0 : str_replace(",", "", $request->input('transfer')),
+                'dp' => (empty($request->input('dp'))) ? 0 : str_replace(",", "", $request->input('dp')),
+                'hutang' => (empty($request->input('hutang'))) ? 0 : str_replace(",", "", $request->input('hutang')),
+                'transaksi' => (empty($request->input('transaksi'))) ? 0 : str_replace(",", "", $request->input('transaksi')),
+                'sisa' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa'),
+                'sisa_hutang' => (empty($request->input('sisa_hutang'))) ? 0 : $request->input('sisa_hutang'),
+                'sisa_dp' => (empty($request->input('sisa_dp'))) ? 0 : $request->input('sisa_dp'),
+                'ket' => $request->input('ket')
+            ];
+
+            // check seller
+            $name = ucwords(trim($request->input('seller')));
+            $seller = Seller::where('name', $name)->where('jenis', $transaksi['jenis'])->get();
+            if(count($seller) == 0) {
+                $sellerCreated = Seller::create([
+                    'name' =>  $name,
+                    'jenis' => $transaksi['jenis']
+                ]);
+            }
+
+            $transaksi['seller_id'] = (count($seller) == 0) ? $sellerCreated->id : $seller[0]->id;
+
+            // update transaksi
+            Transaksi::where('id', $id)->update($transaksi);
+
+            // update hutang jika pembayaran menggunakan hutang
+            if(str_replace(",", "", $request->input('hutang')) > 0){
+                Hutang::updateOrCreate([
+                    'seller_id' => $transaksi['seller_id'],
+                    'transaksi_id' => $id,
+                    'tipe' => 'Bayar',
+                    'jenis' => 'Hutang'
+                ],[
+                    'jumlah' => str_replace(",", "", $request->input('hutang')),
+                    'ket' => 'Bayar pembelian dengan hutang'
+                ]);
+            }
+
+            // update dp jika pembayaran menggunakan dp
+            if(str_replace(",", "", $request->input('dp')) > 0){
+                Hutang::updateOrCreate([
+                    'seller_id' => $transaksi['seller_id'],
+                    'transaksi_id' => $id,
+                    'tipe' => 'Bayar',
+                    'jenis' => 'DP'
+                ],[
+                    'jumlah' => str_replace(",", "", $request->input('dp')),
+                    'ket' => 'Bayar pembelian dengan DP'
+                ]);
+            }
+
+            // delete old detail transaksi
+            $detailTransaksiToDelete = DetailTransaksi::where('transaksi_id', $id)->get();
+            foreach($detailTransaksiToDelete as $detail)
+            {
+                // update stok ke stok awal sebelum transaksi
+                $barang = Barang::find($detail->barang_id);
                 if($jenis == 1){
-                    $barang->stok = $barang->stok + $berats[$i];
+                    $barang->stok = $barang->stok - $detail->berat;
                 }
                 if($jenis == 2){
-                    $barang->stok = $barang->stok - $berats[$i];
+                    $barang->stok = $barang->stok + $detail->berat;
                 }
                 $barang->save();
+
+                $deleteDetail = DetailTransaksi::find($detail->id);
+                $deleteDetail->delete();
             }
+
+            // recreate detail transaksi
+            $detailTransaksi = [];
+            for($i=0;$i<count($barangs);$i++){
+                if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
+                    array_push($detailTransaksi, [
+                        'transaksi_id' => $id,
+                        'barang_id' => $barangs[$i],
+                        'harga' => str_replace(",", "", $hargas[$i]),
+                        'berat' => $berats[$i],
+                        'jenis' => $transaksi['jenis'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // update or create daftar harga barang
+                    if($transaksi['jenis'] == 1){ // beli
+                        Harga::updateOrCreate([
+                            "barang_id" => $barangs[$i],
+                            "beli" => str_replace(",", "", $hargas[$i]),
+                            "ket" => $name
+                        ],[
+                            "jual" => 0
+                        ]);
+                    }
+                    if($transaksi['jenis'] == 2){ // jual
+                        Harga::updateOrCreate([
+                            "barang_id" => $barangs[$i],
+                            "jual" => str_replace(",", "", $hargas[$i]),
+                            "ket" => $name
+                        ],[
+                            "beli" => 0
+                        ]);
+                    }
+
+                    // update stok barang
+                    $barang = Barang::find($barangs[$i]);
+                    if($jenis == 1){
+                        $barang->stok = $barang->stok + $berats[$i];
+                    }
+                    if($jenis == 2){
+                        $barang->stok = $barang->stok - $berats[$i];
+                    }
+                    $barang->save();
+                }
+            }
+            
+            DetailTransaksi::insert($detailTransaksi);
+
         }
-        
-        DetailTransaksi::insert($detailTransaksi);
 
         return redirect()->route('transaksi.index');
     }
@@ -300,16 +403,24 @@ class TransaksiController extends Controller
         return redirect()->route('transaksi.index');
     }
 
+    public function generateInvoice($id)
+    {
+        $profil = Profile::all();
+        $transaksi = Transaksi::with(['seller', 'detail.barang'])->where('id', $id)->get();
+        $pdf = PDF::loadView('pages.transaksi.print', compact('transaksi', 'profil'))->setPaper('envelope dl', 'potrait');
+        return $pdf->stream();
+    }
+
     public function dataBon(Request $request)
     {
         $data = [];
         $transaksis = Transaksi::with(['seller', 'detail' => function($query) {
-            $query->select(DB::raw('SUM(harga*berat) as total'), 'transaksi_id')->groupBy('transaksi_id');
+            $query->select(DB::raw('SUM(harga*berat) as total'), DB::raw('SUM(berat) as berat'), 'transaksi_id')->groupBy('transaksi_id');
         }])->where('jenis', $request->input('jenis'))->orderBy('id', 'desc')->get();
 
         foreach($transaksis as $item){
             array_push($data, [
-                $item->kode, date("m F Y", strtotime($item->created_at)), $item->seller->name, number_format($item->detail[0]->total, 0), $item->ket, $item->id, $item->jenis
+                $item->kode, date("m F Y", strtotime($item->created_at)), $item->seller->name, number_format($item->detail[0]->berat, 0), number_format($item->detail[0]->total, 0), $item->ket, $item->id, $item->jenis
             ]);
         }
 
@@ -334,38 +445,30 @@ class TransaksiController extends Controller
     {
         $datas = [];
         $namaBarang = trim($request->input('nama_barang'));
+        $jenis = trim($request->input('jenis'));
         $barang = Barang::where('name', $namaBarang)->get();
         if(count($barang) > 0){
             $barang_id = $barang[0]->id;
-            $datas = Harga::with(['barang.kategori'])->where('barang_id', $barang_id)->orderBy('jual', 'asc')->get();
+            $datas = Harga::with(['barang.kategori'])->where('barang_id', $barang_id);
+            if($jenis == 1){
+                $datas = $datas->select(DB::raw('beli as harga'), 'created_at', 'ket')->where('beli', '>', 0);
+            }
+            if($jenis == 2){
+                $datas = $datas->select(DB::raw('jual as harga'), 'created_at', 'ket')->where('jual', '>', 0);
+            }
+            $datas = $datas->orderBy('id', 'desc')->limit(25)->get();
         }
 
         return view('pages.transaksi.daftar-harga')->with([
             'datas' => $datas,
-            'namaBarang' => $namaBarang
+            'namaBarang' => $namaBarang,
+            'jenis' => $jenis
         ]);
     }
 
     public function stokBarang(Request $request)
     {
         $barang_id = $request->input('barang_id');
-        // $barang = DetailTransaksi::selectRaw('barang_id, jenis, sum(berat) as berat')
-        //             ->where('barang_id', $barang_id)
-        //             ->groupBy('barang_id')
-        //             ->groupBy('jenis')
-        //             ->get();
-
-        // $beli = 0;
-        // $jual = 0;
-        // foreach($barang as $stok){
-        //     if($stok->jenis == 1){
-        //         $beli += $stok->berat;
-        //     }
-        //     if($stok->jenis == 2){
-        //         $jual += $stok->berat;
-        //     }
-        // }
-        // $stok = $beli - $jual;
         $barang = Barang::find($barang_id);
         $stok = $barang->stok;
 

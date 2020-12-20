@@ -46,11 +46,14 @@
                                     </datalist>
                                 </td>
                                 <td>
-                                    <input type="number" min="0" name="harga[]" id="harga-{{ $i }}" class="form-control text-right harga-barang">
+                                    <input type="text" name="harga[]" id="harga-{{ $i }}" class="form-control text-right harga-barang">
                                     <span class="daftar-harga" id="daftar-harga-{{ $i }}" data-toggle="modal" data-target="#daftarHarga"></span>
                                 </td>
-                                <td><input type="number" min="0" name="kg[]" id="kg-{{ $i }}" class="form-control text-right berat-barang"></td>
-                                <td><input type="number" min="0" name="total[]" id="total-{{ $i }}" readonly class="form-control text-right total-barang"></td>
+                                <td><input type="number" min="0" step="0.01" name="kg[]" id="kg-{{ $i }}" class="form-control text-right berat-barang"></td>
+                                <td>
+                                    <input type="text" name="view_total[]" id="view-total-{{ $i }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="total[]" id="total-{{ $i }}" readonly class="form-control text-right total-barang">
+                                </td>
                             </tr>
                             @endfor
                         </tbody>
@@ -61,8 +64,14 @@
                                     <span style="display: none;" class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                                 </td>
                                 <th colspan="2" style="vertical-align: middle;" class="text-center">Total Retur <span class="jenis-transaksi-text"></span></th>
-                                <th class="text-center"><input type="number" min="0" name="total_berat" id="total-berat" readonly class="form-control text-right"/></th>
-                                <th class="text-center"><input type="number" min="0" name="total_transaksi" id="total-transaksi" readonly class="form-control text-right"/></th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_berat" id="view-total-berat" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_berat" id="total-berat" readonly class="form-control text-right"/>
+                                </th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_transaksi" id="view-total-transaksi" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_transaksi" id="total-transaksi" readonly class="form-control text-right"/>
+                                </th>
                             </tr>
                         </tfoot>
                     </table>

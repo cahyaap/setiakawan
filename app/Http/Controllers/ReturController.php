@@ -83,45 +83,48 @@ class ReturController extends Controller
      */
     public function store(Request $request)
     {
-        $retur = [
-            'transaksi_id' => $request->input('transaksi_id'),
-            'kode' => $request->input('kode'),
-            'ket' => $request->input('ket')
-        ];
-
-        $createdRetur = Retur::create($retur);
-
-        $transaksi = Transaksi::findOrFail($request->input('transaksi_id'));
-
-        // create detail retur
-        $detailRetur = [];
         $barangs = $request->input('barang_id');
         $hargas = $request->input('harga');
         $berats = $request->input('kg');
-        for($i=0;$i<count($barangs);$i++){
-            if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
-                array_push($detailRetur, [
-                    'retur_id' => $createdRetur->id,
-                    'barang_id' => $barangs[$i],
-                    'harga' => $hargas[$i],
-                    'berat' => $berats[$i],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
 
-                // update stok barang
-                $barang = Barang::find($barangs[$i]);
-                if($transaksi->jenis == 1){
-                    $barang->stok = $barang->stok - $berats[$i];
+        if(count($barangs) > 0 && count($hargas) > 0 && count($berats) > 0){
+            $retur = [
+                'transaksi_id' => $request->input('transaksi_id'),
+                'kode' => $request->input('kode'),
+                'ket' => $request->input('ket')
+            ];
+
+            $createdRetur = Retur::create($retur);
+
+            $transaksi = Transaksi::findOrFail($request->input('transaksi_id'));
+
+            // create detail retur
+            $detailRetur = [];
+            for($i=0;$i<count($barangs);$i++){
+                if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
+                    array_push($detailRetur, [
+                        'retur_id' => $createdRetur->id,
+                        'barang_id' => $barangs[$i],
+                        'harga' => str_replace(",", "", $hargas[$i]),
+                        'berat' => $berats[$i],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // update stok barang
+                    $barang = Barang::find($barangs[$i]);
+                    if($transaksi->jenis == 1){
+                        $barang->stok = $barang->stok - $berats[$i];
+                    }
+                    if($transaksi->jenis == 2){
+                        $barang->stok = $barang->stok + $berats[$i];
+                    }
+                    $barang->save();
                 }
-                if($transaksi->jenis == 2){
-                    $barang->stok = $barang->stok + $berats[$i];
-                }
-                $barang->save();
             }
+            
+            DetailRetur::insert($detailRetur);
         }
-        
-        DetailRetur::insert($detailRetur);
 
         return redirect()->route('retur.index');
     }
@@ -171,61 +174,64 @@ class ReturController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $retur = [
-            'transaksi_id' => $request->input('transaksi_id'),
-            'ket' => $request->input('ket')
-        ];
-
-        // update retur data
-        Retur::where('id', $id)->update($retur);
-
-        $transaksi = Transaksi::findOrFail($request->input('transaksi_id'));
-
-        $detailReturOld = DetailRetur::where('retur_id', $id)->get();
-        foreach($detailReturOld as $detail){
-            // update stok ke stok awal sebelum transaksi
-            $barang = Barang::find($detail->barang_id);
-            if($transaksi->jenis == 1){
-                $barang->stok = $barang->stok + $detail->berat;
-            }
-            if($transaksi->jenis == 2){
-                $barang->stok = $barang->stok - $detail->berat;
-            }
-            $barang->save();
-
-            $deleteDetail = DetailRetur::find($detail->id);
-            $deleteDetail->delete();
-        }
-
-        // recreate detail retur
-        $detailRetur = [];
         $barangs = $request->input('barang_id');
         $hargas = $request->input('harga');
         $berats = $request->input('kg');
-        for($i=0;$i<count($barangs);$i++){
-            if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
-                array_push($detailRetur, [
-                    'retur_id' => $id,
-                    'barang_id' => $barangs[$i],
-                    'harga' => $hargas[$i],
-                    'berat' => $berats[$i],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+        
+        if(count($barangs) > 0 && count($hargas) > 0 && count($berats) > 0){
+            $retur = [
+                'transaksi_id' => $request->input('transaksi_id'),
+                'ket' => $request->input('ket')
+            ];
 
-                // update stok barang
-                $barang = Barang::find($barangs[$i]);
+            // update retur data
+            Retur::where('id', $id)->update($retur);
+
+            $transaksi = Transaksi::findOrFail($request->input('transaksi_id'));
+
+            $detailReturOld = DetailRetur::where('retur_id', $id)->get();
+            foreach($detailReturOld as $detail){
+                // update stok ke stok awal sebelum transaksi
+                $barang = Barang::find($detail->barang_id);
                 if($transaksi->jenis == 1){
-                    $barang->stok = $barang->stok - $berats[$i];
+                    $barang->stok = $barang->stok + $detail->berat;
                 }
                 if($transaksi->jenis == 2){
-                    $barang->stok = $barang->stok + $berats[$i];
+                    $barang->stok = $barang->stok - $detail->berat;
                 }
                 $barang->save();
+
+                $deleteDetail = DetailRetur::find($detail->id);
+                $deleteDetail->delete();
             }
+
+            // recreate detail retur
+            $detailRetur = [];
+            for($i=0;$i<count($barangs);$i++){
+                if(!empty($barangs[$i]) && !empty($hargas[$i]) && !empty($berats[$i])){
+                    array_push($detailRetur, [
+                        'retur_id' => $id,
+                        'barang_id' => $barangs[$i],
+                        'harga' => str_replace(",", "", $hargas[$i]),
+                        'berat' => $berats[$i],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    // update stok barang
+                    $barang = Barang::find($barangs[$i]);
+                    if($transaksi->jenis == 1){
+                        $barang->stok = $barang->stok - $berats[$i];
+                    }
+                    if($transaksi->jenis == 2){
+                        $barang->stok = $barang->stok + $berats[$i];
+                    }
+                    $barang->save();
+                }
+            }
+            
+            DetailRetur::insert($detailRetur);
         }
-        
-        DetailRetur::insert($detailRetur);
 
         return redirect()->route('retur.index');
     }

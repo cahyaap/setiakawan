@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
 use App\Models\Pengeluaran;
+use App\Models\Karyawan;
+use App\Models\Absensi;
 
 class HomeController extends Controller
 {
@@ -39,6 +41,25 @@ class HomeController extends Controller
         $transaksis = Transaksi::with(['seller', 'detail' => function($query) {
             $query->select(DB::raw('SUM(harga*berat) as total'), 'transaksi_id')->groupBy('transaksi_id');
         }])->orderBy('id', 'desc')->limit(5)->get();
+
+        // generate absensi
+        $karyawans = Karyawan::where('status', 1)->orderBy('nomor_karyawan', 'asc')->get();
+        $jenis = "h";
+        if(trim(date('l', strtotime(now()))) == "Sunday"){
+            $jenis = "l";
+        }
+        foreach($karyawans as $k){
+            $dataAbsensi = [
+                "karyawan_id" => $k->id,
+                "tanggal" => date('Y-m-d', strtotime(now())),
+                "jenis" => $jenis
+            ];
+
+            $checkAbsensi = Absensi::where('karyawan_id', $k->id)->where('tanggal', date('Y-m-d', strtotime(now())))->get();
+            if(count($checkAbsensi) == 0){
+                Absensi::create($dataAbsensi);
+            }
+        }
 
         return view('pages.dashboard')->with([
             'title' => $this->title,

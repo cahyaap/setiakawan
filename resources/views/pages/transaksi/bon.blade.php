@@ -8,8 +8,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="form-group">
-                    <label for="seller">Seller</label>
+                    <label for="seller">{{ ($jenis == 1) ? "Seller" : "Buyer" }}</label>
                     <input type="text" list="daftar-seller" name="seller" id="seller" onchange="sellerExist(this)" placeholder="Tulis nama seller disini..." required class="form-control seller"/>
+                    <input type="hidden" name="seller_id" id="seller-id">
                     <span class="seller-alert"></span>
                     <datalist id="daftar-seller">
                         @foreach ($sellers as $item)
@@ -46,11 +47,14 @@
                                     </datalist>
                                 </td>
                                 <td>
-                                    <input type="number" min="0" name="harga[]" id="harga-{{ $i }}" class="form-control text-right harga-barang">
+                                    <input type="text" name="harga[]" id="harga-{{ $i }}" class="form-control text-right harga-barang">
                                     <span class="daftar-harga" id="daftar-harga-{{ $i }}" data-toggle="modal" data-target="#daftarHarga"></span>
                                 </td>
-                                <td><input type="number" min="0" name="kg[]" id="kg-{{ $i }}" class="form-control text-right berat-barang"></td>
-                                <td><input type="number" min="0" name="total[]" id="total-{{ $i }}" readonly class="form-control text-right total-barang"></td>
+                                <td><input type="number" min="0" step="0.01" name="kg[]" id="kg-{{ $i }}" class="form-control text-right berat-barang"></td>
+                                <td>
+                                    <input type="text" name="view_total[]" id="view-total-{{ $i }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="total[]" id="total-{{ $i }}" readonly class="form-control text-right total-barang">
+                                </td>
                             </tr>
                             @endfor
                         </tbody>
@@ -61,35 +65,57 @@
                                     <span style="display: none;" class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                                 </td>
                                 <th colspan="2" style="vertical-align: middle;" class="text-center">Total <span class="jenis-transaksi-text"></span></th>
-                                <th class="text-center"><input type="number" min="0" name="total_berat" id="total-berat" readonly class="form-control text-right"/></th>
-                                <th class="text-center"><input type="number" min="0" name="total_transaksi" id="total-transaksi" readonly class="form-control text-right"/></th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_berat" id="view-total-berat" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_berat" id="total-berat" readonly class="form-control text-right"/>
+                                </th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_transaksi" id="view-total-transaksi" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_transaksi" id="total-transaksi" readonly class="form-control text-right"/>
+                                </th>
                             </tr>
                             <tr>
-                                <th class="text-center" style="vertical-align: middle" rowspan="4" colspan="3">Pembayaran</th>
+                                <th class="text-center" style="vertical-align: middle" rowspan="5" colspan="3">Pembayaran</th>
                                 <td style="vertical-align: middle">Kas</td>
-                                <td><input type="number" min="0" name="kas" id="kas" class="form-control text-right"></td>
+                                <td><input type="text" name="kas" id="kas" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">Transfer</td>
-                                <td><input type="number" min="0" name="transfer" id="transfer" class="form-control text-right"></td>
+                                <td><input type="text" name="transfer" id="transfer" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">DP</td>
-                                <td><input type="number" min="0" name="dp" id="dp" class="form-control text-right"></td>
+                                <td><input type="text" name="dp" id="dp" onkeyup="updateSisaHutangDP(this.value, '#sisa-dp-temp', '#sisa-dp', '#view-sisa-dp')" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">Hutang</td>
-                                <td><input type="number" min="0" name="hutang" id="hutang" onkeyup="updateSisaHutang(this.value)" class="form-control text-right"></td>
+                                <td><input type="text" name="hutang" id="hutang" onkeyup="updateSisaHutangDP(this.value, '#sisa-hutang-temp', '#sisa-hutang', '#view-sisa-hutang')" class="form-control text-right"></td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle">{{ ($jenis == 1) ? "Penjualan" : "Pembelian" }}</td>
+                                <td><input type="text" name="transaksi" id="transaksi" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Pembayaran</th>
-                                <td><input type="number" min="0" name="sisa" id="sisa" readonly class="form-control text-right"></td>
+                                <td>
+                                    <input type="text" name="view_sisa" id="view-sisa" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa" id="sisa" readonly class="form-control text-right">
+                                </td>
+                            </tr>
+                            <tr @if ($jenis == 2) style="opacity: 0; position: absolute;" @endif>
+                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang {{ ($jenis == 1) ? "Seller" : "Buyer" }}</th>
+                                <td>
+                                    <input type="text" name="view_sisa_hutang" id="view-sisa-hutang" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_hutang" id="sisa-hutang" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_hutang_temp" id="sisa-hutang-temp">
+                                </td>
                             </tr>
                             <tr>
-                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang</th>
+                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa DP {{ ($jenis == 1) ? "Seller" : "Buyer" }}</th>
                                 <td>
-                                    <input type="number" min="0" name="sisa_hutang" id="sisa-hutang" readonly class="form-control text-right">
-                                    <input type="hidden" min="0" name="sisa_hutang_temp" id="sisa-hutang-temp">
+                                    <input type="text" name="view_sisa_dp" id="view-sisa-dp" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_dp" id="sisa-dp" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_dp_temp" id="sisa-dp-temp">
                                 </td>
                             </tr>
                         </tfoot>

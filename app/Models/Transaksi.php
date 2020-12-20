@@ -23,10 +23,16 @@ class Transaksi extends Model
         return $this->hasOne(Retur::class, 'transaksi_id', 'id');
     }
 
+    public function hutang(){
+        return $this->hasOne(Hutang::class, 'transaksi_id', 'id');
+    }
+
     public static function boot() {
         parent::boot();
         static::deleting(function($transaksi) {
              $transaksi->detail()->delete();
+             $transaksi->hutang()->delete();
+             $transaksi->retur()->delete();
         });
     }
 }

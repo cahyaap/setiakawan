@@ -14,4 +14,8 @@ class Hutang extends Model
     public function seller(){
         return $this->belongsTo(Seller::class, 'seller_id');
     }
+
+    public function transaksi(){
+        return $this->belongsTo(Transaksi::class, 'transaksi_id');
+    }
 }

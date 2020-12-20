@@ -11,9 +11,12 @@
         </datalist>
     </td>
     <td>
-        <input type="number" name="harga[]" id="harga-{{ $rowId }}" class="form-control text-right harga-barang">
+        <input type="text" name="harga[]" id="harga-{{ $rowId }}" class="form-control text-right harga-barang">
         <span class="daftar-harga" id="daftar-harga-{{ $rowId }}" data-toggle="modal" data-target="#daftarHarga"></span>
     </td>
-    <td><input type="number" name="kg[]" id="kg-{{ $rowId }}" class="form-control text-right berat-barang"></td>
-    <td><input type="number" name="total[]" id="total-{{ $rowId }}" readonly class="form-control text-right total-barang"></td>
+    <td><input type="number" min="0" step="0.01" name="kg[]" id="kg-{{ $rowId }}" class="form-control text-right berat-barang"></td>
+    <td>
+        <input type="text" name="view_total[]" id="view-total-{{ $rowId }}" readonly class="form-control text-right">
+        <input type="hidden" name="total[]" id="total-{{ $rowId }}" readonly class="form-control text-right total-barang">
+    </td>
 </tr>

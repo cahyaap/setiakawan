@@ -47,10 +47,13 @@ class SellerController extends Controller
     public function sellerExist(Request $request)
     {
         $name = $request->input('name');
-        $seller = Seller::where('name', $name)->get();
+        $jenis = $request->input('jenis');
+        $seller = Seller::where('name', $name)->where('jenis', $jenis)->get();
+        $sellerId = (count($seller) > 0) ? $seller[0]->id : "";
 
         return response()->json([
-            'seller' => count($seller)
+            'seller' => count($seller),
+            'sellerId' => $sellerId
         ]);
     }
 

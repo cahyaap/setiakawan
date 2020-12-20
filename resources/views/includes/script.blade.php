@@ -143,14 +143,36 @@
 
     function sellerExist(e){
         $('.seller-alert').empty();
+        var jenis = $('#jenis').val();
         $.ajax({
             url: "{{ route('seller-exist') }}",
-            data: { name: e.value },
+            data: {
+                name: e.value,
+                jenis: jenis
+            },
             success: function(res){
                 if(res.seller == 0){
-                    $('.seller-alert').append("Data seller belum ada di database, akan dimasukkan sebagai data seller baru");
+                    var seller = (jenis == 1) ? "seller" : "buyer";
+                    $('.seller-alert').append("Data "+seller+" belum ada di database, akan disimpan sebagai data "+seller+" baru");
                 }
-                getHutangBySeller(e.value);
+                $('#seller-id').val(res.sellerId);
+                getHutangBySeller(res.sellerId);
+            }
+        });
+        $('#nama-0').focus();
+    }
+
+    function nomorIndukExist(e){
+        $('.nomor-karyawan-alert').empty();
+        $('#tambah-karyawan').removeAttr('disabled');
+        $.ajax({
+            url: "{{ route('nomor-induk-exist') }}",
+            data: { nomor_karyawan: e.value },
+            success: function(res){
+                if(res.karyawan > 0){
+                    $('.nomor-karyawan-alert').append("Nomor induk karyawan sudah digunakan");
+                    $('#tambah-karyawan').attr('disabled', 'disabled');
+                }
             }
         });
     }
@@ -176,26 +198,28 @@
         });
     }
 
-    function getHutangBySeller(name){
-        var jenisTransaksi = $('#jenis').val();
-        var tipeHutang = (jenisTransaksi == 1) ? "Hutang" : "Piutang";
-        $('#sisa-hutang, #sisa-hutang-temp').val(0);
+    function getHutangBySeller(sellerId){
+        var jenis = $('#jenis').val();
+        $('#sisa-hutang, #sisa-hutang-temp, #sisa-dp, #sisa-dp-temp').val(0);
         $.ajax({
             url: "{{ route('get-hutang-by-seller') }}",
-            data: { name: name, tipe: tipeHutang },
+            data: { seller_id: sellerId, jenis: jenis },
             success: function(res){
                 $('#sisa-hutang, #sisa-hutang-temp').val(res.hutang);
+                $('#view-sisa-hutang').val(addCommas(res.hutang));
+
+                $('#sisa-dp, #sisa-dp-temp').val(res.dp);
+                $('#view-sisa-dp').val(addCommas(res.dp));
             }
         });
     }
 
-    function updateSisaHutang(pembayaranHutang){
-        var sisaHutangTemp = $('#sisa-hutang-temp').val();
-        var sisaHutang = $('#sisa-hutang').val();
-        if(sisaHutang > 0){
-            sisaHutang = sisaHutangTemp - pembayaranHutang;
-        }
-        $('#sisa-hutang').val(sisaHutang);
+    function updateSisaHutangDP(pembayaran, sisaTempEl, sisaEl, sisaViewEl){
+        var sisaTemp = $(sisaTempEl).val();
+        var sisa = $(sisaEl).val();
+        sisa = sisaTemp - Number(pembayaran.replace(/\,/g,''));
+        $(sisaEl).val(sisa);
+        $(sisaViewEl).val(addCommas(sisa));
     }
 
     function capitalizeFirstLetter(string) {
@@ -228,7 +252,7 @@
         return idBaris;
     }
 
-    function updateTotal(element, result){
+    function updateTotal(element, result, view){
         var total = 0;
         var arr = $(element);
         for(var i=0;i<arr.length;i++){
@@ -236,18 +260,21 @@
             total += parseInt(arr[i].value);
         }
         $(result).val(parseInt(total));
+        $(view).val(addCommas(parseInt(total)));
         return total;
     }
 
     function updateSisa(total, kas, tf, dp, hutang){
         var total = ($('#total-transaksi').val() == "") ? 0 : $('#total-transaksi').val();
-        var kas = ($('#kas').val() == "") ? 0 : $('#kas').val();
-        var tf = ($('#transfer').val() == "") ? 0 : $('#transfer').val();
-        var dp = ($('#dp').val() == "") ? 0 : $('#dp').val();
-        var hutang = ($('#hutang').val() == "") ? 0 : $('#hutang').val();
+        var kas = ($('#kas').val() == "") ? 0 : Number($('#kas').val().replace(/\,/g,''));
+        var tf = ($('#transfer').val() == "") ? 0 : Number($('#transfer').val().replace(/\,/g,''));
+        var dp = ($('#dp').val() == "") ? 0 : Number($('#dp').val().replace(/\,/g,''));
+        var hutang = ($('#hutang').val() == "") ? 0 : Number($('#hutang').val().replace(/\,/g,''));
+        var transaksi = ($('#transaksi').val() == "") ? 0 : Number($('#transaksi').val().replace(/\,/g,''));
         var sisa = ($('#sisa').val() == "") ? 0 : $('#sisa').val();
-        var sisa = total - kas - tf - dp - hutang;
+        var sisa = total - kas - tf - dp - hutang - transaksi;
         $('#sisa').val(sisa);
+        $('#view-sisa').val(addCommas(sisa));
         return sisa;
     }
 
@@ -296,4 +323,24 @@
         }
         return x1 + x2;
     }
+
+    $('body').on('keydown', 'input[type=number]', function(e) {
+        if (e.which === 38 || e.which === 40) {
+            e.preventDefault();
+        }
+    });
+
+    $('body').on('keyup', 'input', function(e) {
+        if(e.which == 39) {
+            $(this).closest('td').next().find('input').focus();
+        } else if(e.which == 37) {
+            $(this).closest('td').prev().find('input').focus();
+        } else if(e.which == 40) {
+            e.preventDefault();
+            $(this).closest('tr').next().find('td:eq('+$(this).closest('td').index()+')').find('input').focus();
+        } else if(e.which == 38) {
+            e.preventDefault();
+            $(this).closest('tr').prev().find('td:eq('+$(this).closest('td').index()+')').find('input').focus();
+        }
+    });
 </script>

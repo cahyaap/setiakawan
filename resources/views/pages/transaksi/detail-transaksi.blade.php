@@ -3,7 +3,7 @@
         <div class="col-md-12">
             <h3 class="box-title">
                 Bon <span class="jenis-transaksi-text"></span> - {{ $transaksi[0]->kode }}
-                <a class='btn btn-success pull-right' alt='Print' title='Print' href='#printTransaksi' data-jenis='"+row[6]+"' data-aksi='print' data-id='{{ $transaksi[0]->id }}'><span><i class='fa fa-print'></i></span> Print</a>
+                <a class='btn btn-success pull-right' alt='Print' title='Print' href='{{ route('transaksi.print', $transaksi[0]->id) }}' target="_blank" data-jenis='"+row[6]+"' data-aksi='print' data-id='{{ $transaksi[0]->id }}'><span><i class='fa fa-print'></i></span> Print</a>
             </h3>
         </div>
         <div class="col-md-12">
@@ -69,7 +69,7 @@
                             <th class="text-right">{{ number_format($totalTransaksi, 0) }}</th>
                         </tr>
                         <tr>
-                            <th class="text-center" style="vertical-align: middle" rowspan="4" colspan="3">Pembayaran</th>
+                            <th class="text-center" style="vertical-align: middle" rowspan="5" colspan="3">Pembayaran</th>
                             <td style="vertical-align: middle">Kas</td>
                             <td class="text-right">{{ number_format($transaksi[0]->kas, 0) }}</td>
                         </tr>
@@ -86,12 +86,20 @@
                             <td class="text-right">{{ number_format($transaksi[0]->hutang, 0) }}</td>
                         </tr>
                         <tr>
+                            <td style="vertical-align: middle">{{ ($transaksi[0]->jenis == 1) ? "Penjualan" : "Pembelian" }}</td>
+                            <td class="text-right">{{ number_format($transaksi[0]->transaksi, 0) }}</td>
+                        </tr>
+                        <tr>
                             <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Pembayaran</th>
                             <td class="text-right">{{ number_format($transaksi[0]->sisa, 0) }}</td>
                         </tr>
-                        <tr>
-                            <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang</th>
+                        <tr @if ($transaksi[0]->jenis == 2) style="opacity: 0; position: absolute;" @endif>
+                            <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang {{ ($transaksi[0]->jenis == 1) ? "Seller" : "Buyer" }}</th>
                             <td class="text-right">{{ number_format($transaksi[0]->sisa_hutang, 0) }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-center" style="vertical-align: middle" colspan="4">Sisa DP {{ ($transaksi[0]->jenis == 1) ? "Seller" : "Buyer" }}</th>
+                            <td class="text-right">{{ number_format($transaksi[0]->sisa_dp, 0) }}</td>
                         </tr>
                     </tfoot>
                 </table>

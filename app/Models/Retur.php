@@ -19,7 +19,7 @@ class Retur extends Model
     public static function boot() {
         parent::boot();
         static::deleting(function($retur) {
-             $retur->detail()->delete();
+            $retur->detail()->delete();
         });
     }
 }

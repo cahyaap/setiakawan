@@ -9,7 +9,7 @@
     <title>{{ $title }}</title>
     <meta name="description" content="Shayna Admin Panel">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <link rel="icon" href="{{ public_path('logo-sk.jpeg') }}">
     {{-- style --}}
     @stack('before-style')
     @include('includes.style')
@@ -20,13 +20,43 @@
     <div id="wrapper">
         @include('includes.navbar')
         @include('includes.sidebar')
+        @php
+            $hari = [
+                "Sunday" => "Minggu",
+                "Monday" => "Senin",
+                "Tuesday" => "Selasa",
+                "Wednesday" => "Rabu",
+                "Thursday" => "Kamis",
+                "Friday" => "Jum'at",
+                "Saturday" => "Sabtu"
+            ];
+            $bulan = [
+                "January" => "Januari",
+                "February" => "Februari",
+                "March" => "Maret",
+                "April" => "April",
+                "May" => "Mei",
+                "June" => "Juni",
+                "July" => "Juli",
+                "August" => "Agustus",
+                "September" => "September",
+                "October" => "Oktober",
+                "November" => "November",
+                "December" => "Desember"
+            ];
+            function convertDate($date, $bulan){
+                $explode = explode(" ", $date);
+                $explode[1] = $bulan[$explode[1]];
+                return implode(" ", $explode);
+            }
+        @endphp
         <div id="page-wrapper">
             <div class="container-fluid">
                 <div class="row bg-title">
                     <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
                         <h4 class="page-title">{{ $title }}</h4> </div>
                     <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                      <h4 class="page-time pull-right"><?php echo date('l, d F Y',time());?></h4>
+                      <h4 class="page-time pull-right">{{ $hari[date('l', time())] }}, {{ convertDate(date('d F Y',time()), $bulan) }}</h4>
                     </div>
                 </div>
                 {{-- content --}}

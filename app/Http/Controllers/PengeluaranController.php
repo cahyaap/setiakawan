@@ -49,7 +49,7 @@ class PengeluaranController extends Controller
     {
         $pengeluaran = [
             'name' => $request->input('name'),
-            'nominal' => $request->input('nominal'),
+            'nominal' => str_replace(",", "", $request->input('nominal')),
             'ket' => $request->input('ket')
         ];
 
@@ -91,7 +91,7 @@ class PengeluaranController extends Controller
     {
         $pengeluaran = Pengeluaran::find($id);
         $pengeluaran->name = $request->input('name');
-        $pengeluaran->nominal = $request->input('nominal');
+        $pengeluaran->nominal = str_replace(",", "", $request->input('nominal'));
         $pengeluaran->ket = $request->input('ket');
         $pengeluaran->save();
 

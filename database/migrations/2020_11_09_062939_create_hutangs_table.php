@@ -16,9 +16,11 @@ class CreateHutangsTable extends Migration
         Schema::create('hutangs', function (Blueprint $table) {
             $table->id();
             $table->integer('seller_id');
+            $table->integer('transaksi_id')->nullable();
             $table->string('tipe');
             $table->string('jenis');
             $table->bigInteger('jumlah')->default(0);
+            $table->text('ket')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

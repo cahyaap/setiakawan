@@ -74,8 +74,11 @@
             }
         });
 
+        var jenis = "";
+
         $('.transaksi-button').click(function(){
             var id = $(this).attr('id');
+            jenis = id;
             getBon("{{ route('retur.create') }}", "#tambah-transaksi-box", { jenis: id });
         });
 
@@ -98,23 +101,28 @@
         });
 
         $(document).on('keyup', '.harga-barang', function(){
+            $(this).val(function(index, value) {
+                return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            });
             var _this = $(this);
             var idBaris = splitIdBaris(_this.attr('id'));
-            var harga = _this.val();
+            var harga = Number(_this.val().replace(/\,/g,''));
             var berat = $('#kg-'+idBaris).val();
             $('#total-'+idBaris).val(harga * berat);
-            updateTotal('.total-barang', '#total-transaksi');
-            updateTotal('.berat-barang', '#total-berat');
+            $('#view-total-'+idBaris).val(addCommas(harga * berat));
+            updateTotal('.total-barang', '#total-transaksi', '#view-total-transaksi');
+            updateTotal('.berat-barang', '#total-berat', '#view-total-berat');
         });
 
         $(document).on('keyup', '.berat-barang', function(){
             var _this = $(this);
             var idBaris = splitIdBaris(_this.attr('id'));
             var berat = _this.val();
-            var harga = $('#harga-'+idBaris).val();
+            var harga = Number($('#harga-'+idBaris).val().replace(/\,/g,''));
             $('#total-'+idBaris).val(harga * berat);
-            updateTotal('.total-barang', '#total-transaksi');
-            updateTotal('.berat-barang', '#total-berat');
+            $('#view-total-'+idBaris).val(addCommas(harga * berat));
+            updateTotal('.total-barang', '#total-transaksi', '#view-total-transaksi');
+            updateTotal('.berat-barang', '#total-berat', '#view-total-berat');
         });
 
         $(document).on('click', '.daftar-harga', function(){
@@ -124,7 +132,8 @@
             $.ajax({
                 url: "{{ route('daftar-harga') }}",
                 data: {
-                    nama_barang: namaBarang
+                    nama_barang: namaBarang,
+                    jenis: jenis
                 },
                 success: function(res){
                     $('#daftar-harga-nama-barang').html(" - "+namaBarang)

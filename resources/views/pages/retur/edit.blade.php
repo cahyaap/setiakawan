@@ -57,11 +57,14 @@
                                     </datalist>
                                 </td>
                                 <td>
-                                    <input type="number" min="0" name="harga[]" id="harga-{{ $i }}" value="{{ $harga }}" class="form-control text-right harga-barang">
+                                    <input type="text" name="harga[]" id="harga-{{ $i }}" value="{{ number_format($harga, 0) }}" class="form-control text-right harga-barang">
                                     <span class="daftar-harga" id="daftar-harga-{{ $i }}" data-toggle="modal" data-target="#daftarHarga"></span>
                                 </td>
-                                <td><input type="number" min="0" name="kg[]" id="kg-{{ $i }}" value="{{ $berat }}" class="form-control text-right berat-barang"></td>
-                                <td><input type="number" min="0" name="total[]" id="total-{{ $i }}" value="{{ $total }}" readonly class="form-control text-right total-barang"></td>
+                                <td><input type="number" min="0" step="0.01" name="kg[]" id="kg-{{ $i }}" value="{{ $berat }}" class="form-control text-right berat-barang"></td>
+                                <td>
+                                    <input type="text" name="view_total[]" id="view-total-{{ $i }}" value="{{ number_format($total, 0) }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="total[]" id="total-{{ $i }}" value="{{ $total }}" readonly class="form-control text-right total-barang">
+                                </td>
                             </tr>
                             @php
                                 $i++;
@@ -75,15 +78,21 @@
                                     <span style="display: none;" class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                                 </td>
                                 <th colspan="2" style="vertical-align: middle;" class="text-center">Total <span class="jenis-transaksi-text"></span></th>
-                                <th class="text-center"><input type="number" min="0" name="total_berat" id="total-berat" value="{{ $totalBerat }}" readonly class="form-control text-right"/></th>
-                                <th class="text-center"><input type="number" min="0" name="total_transaksi" id="total-transaksi" value="{{ $totalTransaksi }}" readonly class="form-control text-right"/></th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_berat" id="view-total-berat" value="{{ number_format($totalBerat, 0) }}" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_berat" id="total-berat" value="{{ $totalBerat }}" readonly class="form-control text-right"/>
+                                </th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_transaksi" id="view-total-transaksi" value="{{ number_format($totalTransaksi, 0) }}" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_transaksi" id="total-transaksi" value="{{ $totalTransaksi }}" readonly class="form-control text-right"/>
+                                </th>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
                 <div class="form-group">
                     <label for="ket">Keterangan</label>
-                    <textarea name="ket" id="ket" rows="4" class="form-control" placeholder="Masukkan keterangan disini..."></textarea>
+                    <textarea name="ket" id="ket" rows="4" class="form-control" placeholder="Masukkan keterangan disini...">{{ $retur[0]->ket }}</textarea>
                 </div>
                 <div class="form-group text-center">
                     <button type="button" class="btn btn-default waves-effect batal-bon-button" data-transaksi="transaksi" id="batal-bon-transaksi">Batal</button>

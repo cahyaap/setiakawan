@@ -67,9 +67,7 @@
                                     <tbody>
                                         @foreach ($transaksis as $item)
                                         <tr>
-                                            <td class="txt-oflo text-center">
-                                                <a class='detail-btn' alt='Detail' title='Detail' href='#detailTransaksi' data-jenis='{{ $item->jenis }}' data-aksi='detail' data-id='{{ $item->id }}' data-toggle='modal' data-target='#detailTransaksi'>{{ $item->kode }}</a>
-                                            </td>
+                                            <td class="txt-oflo text-center">{{ $item->kode }}</td>
                                             <td class="txt-oflo">{{ $item->seller->name }}</td>
                                             <td class="txt-oflo text-right">{{ number_format($item->detail[0]->total, 0) }}</td>
                                             <td class="text-center">
@@ -81,7 +79,8 @@
                                                 @endif
                                             </td>
                                             <td class="text-center">
-                                                <a class='btn btn-sm btn-success print-btn' alt='Print' title='Print' href='#printTransaksi'><span><i class='fa fa-print'></i></span></a>
+                                                <a class='btn btn-sm btn-success print-btn' alt='Print' title='Print' href='{{ route('transaksi.print', $item->id) }}' target="_blank"><span><i class='fa fa-print'></i></span></a>
+                                                <a class='btn btn-sm btn-info detail-btn aksi-btn' alt='Detail' title='Detail' href='#detailTransaksi' data-jenis='{{ $item->jenis }}' data-aksi='detail' data-id='{{ $item->id }}' data-toggle='modal' data-target='#detailTransaksi'><span><i class='fa fa-search-plus'></i></span></a>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -126,11 +125,47 @@
     </div>
 @endsection
 
+<div id="detailTransaksi" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addOrder" aria-hidden="true"
+    style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Detail Transaksi</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 text-center load-content"><span><i class="fa fa-spinner fa-spin"></i></span></div>
+                    <div class="col-md-12" id="detail-transaksi-data"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('after-script')
 <script type="text/javascript">
     $('.stok-habis').DataTable({
         "order": [[ 0, "asc" ],[ 2, "asc" ]]
     });
     $('.stok-habis').removeClass('dataTable');
+
+    $(document).ready(function(){
+        $(document).on('click', '.aksi-btn', function(){
+            var _this = $(this);
+            var transaksi_id = _this.data('id');
+            var jenis = _this.data('jenis');
+            var aksi = _this.data('aksi');
+            var route = "";
+            if(aksi === "detail"){
+                route = "{{ route('transaksi.show', 'transaksi_id') }}";
+                route = route.replace('transaksi_id', transaksi_id);
+                getAksiData(route, '#detail-transaksi-data', { jenis: jenis });
+            }
+        });
+    });
 </script>
 @endpush

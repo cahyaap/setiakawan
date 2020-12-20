@@ -5,6 +5,10 @@
 
         var columns = [
             {
+                title: "#",
+                className: "text-center"
+            },
+            {
                 title: "Tanggal",
                 className: "text-center"
             },
@@ -16,37 +20,40 @@
                 className: 'text-center'
             },
             {
+                title: "Jenis",
+                className: 'text-center'
+            },
+            {
                 title: "Jumlah",
                 className: 'text-right',
                 render: function(data, type, row) {
-                    return addCommas(row[3]);
+                    return addCommas(row[5]);
                 }
             },
             {
-                title: "Status",
-                className: 'text-center',
+                title: "Keterangan",
                 render: function(data, type, row) {
-                    var jenis = "";
-                    if(row[4] == "Kredit"){
-                        jenis = "<span class='badge badge-danger'>"+row[4]+"</span>";
-                    } else {
-                        jenis = "<span class='badge badge-success'>"+row[4]+"</span>";
-                    }
-                    return jenis
+                    return (row[6]) ? row[6] : "-";
                 }
             },
             {
                 title: "Aksi",
                 className: 'text-center',
                 render: function(data, type, row) {
-                    var edit = "<a class='btn btn-sm btn-warning aksi-btn edit-btn' alt='Edit' title='Edit' href='#editHutangPiutang' data-name='"+row[1]+"'  data-tipe='"+row[2]+"' data-jumlah='"+row[3]+"' data-aksi='edit' data-id='"+row[5][0]+"' data-seller-id='"+row[5][1]+"' data-toggle='modal' data-target='#editHP'><span><i class='fa fa-pencil'></i></span></a>";
-                    var hapus = "<a class='btn btn-sm btn-danger aksi-btn hapus-btn' alt='Hapus' title='Hapus' href='#hapusHutangPiutang' data-name='"+row[1]+"' data-aksi='hapus' data-tipe='"+row[2]+"' data-jumlah='"+row[3]+"' data-id='"+row[5][0]+"' data-toggle='modal' data-target='#hapusHP'><span><i class='fa fa-trash'></i></span></a>";
-                    return edit + " " + hapus
+                    var edit = "<a class='btn btn-sm btn-warning aksi-btn edit-btn' alt='Edit' title='Edit' href='#editHutangPiutang' data-name='"+row[2]+"'  data-tipe='"+row[3]+"' data-jenis='"+row[4]+"' data-jumlah='"+row[5]+"' data-ket='"+row[6]+"' data-aksi='edit' data-id='"+row[7][0]+"' data-seller-id='"+row[7][1]+"' data-toggle='modal' data-target='#editHP'><span><i class='fa fa-pencil'></i></span></a>";
+                    var hapus = "<a class='btn btn-sm btn-danger aksi-btn hapus-btn' alt='Hapus' title='Hapus' href='#hapusHutangPiutang' data-name='"+row[2]+"' data-aksi='hapus' data-tipe='"+row[3]+"' data-jumlah='"+row[5]+"' data-id='"+row[7][0]+"' data-toggle='modal' data-target='#hapusHP'><span><i class='fa fa-trash'></i></span></a>";
+                    return (row[7][2]) ? "-" : edit + " " + hapus
                 }
             }
         ];
 
-        getTableData("{{ route('get-hutang') }}", "#tabel-hutang-piutang", columns, null, [[0, "desc"]]);
+        getTableData("{{ route('get-hutang') }}", "#tabel-hutang-piutang", columns, null, [[0, "asc"]]);
+
+        $(document).on('keyup', '#jumlah, #edit-jumlah', function(){
+            $(this).val(function(index, value) {
+                return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            });
+        });
 
         $(document).on('click', '.aksi-btn', function(){
             var _this = $(this);
@@ -55,8 +62,10 @@
             var route = "";
             if(aksi === "edit"){
                 $('#edit-seller-id').select2('val', _this.data('seller-id'));
-                $('#edit-tipe').val(_this.data('tipe'));
-                $('#edit-jumlah').val(_this.data('jumlah'));
+                $("#edit-tipe-"+_this.data('tipe')).prop("checked", true);
+                $("#edit-jenis-"+_this.data('jenis')).prop("checked", true);
+                $('#edit-jumlah').val(addCommas(_this.data('jumlah')));
+                $('#edit-ket').val(_this.data('ket'));
                 route = "{{ route('hutang-piutang.update', 'hutang_id') }}";
                 route = route.replace('hutang_id', hutang_id);
                 $('#edit-hutang-piutang-form').attr('action', route);
@@ -67,10 +76,8 @@
                 var jumlah = _this.data('jumlah');
                 route = "{{ route('hutang-piutang.destroy', 'hutang_id') }}";
                 route = route.replace('hutang_id', hutang_id);
-                $('.tipe-hp').empty();
                 $('.seller-name').empty();
                 $('.seller-jumlah').empty();
-                $('.tipe-hp').empty(tipe);
                 $('.seller-name').html(name);
                 $('.seller-jumlah').html(jumlah);
                 $('#hapus-hutang-piutang-form').attr('action', route);

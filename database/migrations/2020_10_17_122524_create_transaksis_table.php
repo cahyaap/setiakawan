@@ -22,8 +22,10 @@ class CreateTransaksisTable extends Migration
             $table->bigInteger('tf')->default(0);
             $table->bigInteger('dp')->default(0);
             $table->bigInteger('hutang')->default(0);
+            $table->bigInteger('transaksi')->default(0);
             $table->bigInteger('sisa')->default(0);
             $table->bigInteger('sisa_hutang')->default(0);
+            $table->bigInteger('sisa_dp')->default(0);
             $table->text('ket')->nullable();
             $table->softDeletes();
             $table->timestamps();

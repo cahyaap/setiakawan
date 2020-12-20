@@ -12,6 +12,7 @@
                     <div class="form-group">
                         <label for="seller">Seller</label>
                         <input type="text" list="daftar-seller" name="seller" id="seller" onchange="sellerExist(this)" placeholder="Tulis nama seller disini..." required class="form-control seller" value="{{ $transaksi[0]->seller->name }}"/>
+                        <input type="hidden" name="seller_id" id="seller-id" value="{{ $transaksi[0]->seller->id }}">
                         <datalist id="daftar-seller">
                             @foreach ($sellers as $item)
                             <option value="{{ $item->name }}">
@@ -66,7 +67,7 @@
                                 <td>
                                     <input type="text" list="nama-barang-{{ $i }}" name="nama[]" id="nama-{{ $i }}" value="{{ $detail->barang->name }}" class="form-control nama-barang">
                                     <input type="hidden" name="barang_id[]" id="barang-id-{{ $i }}" value="{{ $detail->barang->id }}" class="form-control barang-id">
-                                    <span class="nama-barang-alert" id="nama-barang-{{ $i }}-alert"></span>
+                                    <span class="nama-barang-alert" id="nama-barang-{{ $i }}-alert">Stok saat ini: <strong>{{ $detail->barang->stok }} kg</strong></span>
                                     <datalist id="nama-barang-{{ $i }}">
                                         @foreach ($barangs as $item)
                                         <option data-id="{{ $item->id }}" value="{{ $item->name }}">
@@ -74,11 +75,14 @@
                                     </datalist>
                                 </td>
                                 <td>
-                                    <input type="number" min="0" name="harga[]" id="harga-{{ $i }}" value="{{ $harga }}" class="form-control text-right harga-barang">
-                                    <span class="daftar-harga" id="daftar-harga-{{ $i }}" data-toggle="modal" data-target="#daftarHarga"></span>
+                                    <input type="text" name="harga[]" id="harga-{{ $i }}" value="{{ number_format($harga, 0) }}" class="form-control text-right harga-barang">
+                                    <span class="daftar-harga" id="daftar-harga-{{ $i }}" nama-barang="{{ $detail->barang->name }}" data-toggle="modal" data-target="#daftarHarga">Lihat daftar harga</span>
                                 </td>
-                                <td><input type="number" min="0" name="kg[]" id="kg-{{ $i }}" value="{{ $berat }}" class="form-control text-right berat-barang"></td>
-                                <td><input type="number" min="0" name="total[]" id="total-{{ $i }}" value="{{ $total }}" readonly class="form-control text-right total-barang"></td>
+                                <td><input type="number" min="0" step="0.01" name="kg[]" id="kg-{{ $i }}" value="{{ $berat }}" class="form-control text-right berat-barang"></td>
+                                <td>
+                                    <input type="text" name="view_total[]" id="view-total-{{ $i }}" value="{{ number_format($total, 0) }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="total[]" id="total-{{ $i }}" value="{{ $total }}" readonly class="form-control text-right total-barang">
+                                </td>
                             </tr>
                             @php
                                 $i++;
@@ -92,35 +96,57 @@
                                     <span style="display: none;" class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                                 </td>
                                 <th colspan="2" style="vertical-align: middle;" class="text-center">Total <span class="jenis-transaksi-text"></span></th>
-                                <th class="text-center"><input type="number" min="0" name="total_berat" id="total-berat" value="{{ $totalBerat }}" readonly class="form-control text-right"/></th>
-                                <th class="text-center"><input type="number" min="0" name="total_transaksi" id="total-transaksi" value="{{ $totalTransaksi }}" readonly class="form-control text-right"/></th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_berat" id="view-total-berat" value="{{ number_format($totalBerat, 0) }}" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_berat" id="total-berat" value="{{ $totalBerat }}" readonly class="form-control text-right"/>
+                                </th>
+                                <th class="text-center">
+                                    <input type="text" name="view_total_transaksi" id="view-total-transaksi" value="{{ number_format($totalTransaksi, 0) }}" readonly class="form-control text-right"/>
+                                    <input type="hidden" name="total_transaksi" id="total-transaksi" value="{{ $totalTransaksi }}" readonly class="form-control text-right"/>
+                                </th>
                             </tr>
                             <tr>
-                                <th class="text-center" style="vertical-align: middle" rowspan="4" colspan="3">Pembayaran</th>
+                                <th class="text-center" style="vertical-align: middle" rowspan="5" colspan="3">Pembayaran</th>
                                 <td style="vertical-align: middle">Kas</td>
-                                <td><input type="number" min="0" name="kas" id="kas" value="{{ $transaksi[0]->kas }}" class="form-control text-right"></td>
+                                <td><input type="text" name="kas" id="kas" value="{{ number_format($transaksi[0]->kas, 0) }}" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">Transfer</td>
-                                <td><input type="number" min="0" name="transfer" id="transfer" value="{{ $transaksi[0]->tf }}" class="form-control text-right"></td>
+                                <td><input type="text" name="transfer" id="transfer" value="{{ number_format($transaksi[0]->tf, 0) }}" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">DP</td>
-                                <td><input type="number" min="0" name="dp" id="dp" value="{{ $transaksi[0]->dp }}" class="form-control text-right"></td>
+                                <td><input type="text" name="dp" id="dp" onkeyup="updateSisaHutangDP(this.value, '#sisa-dp-temp', '#sisa-dp', '#view-sisa-dp')" value="{{ number_format($transaksi[0]->dp, 0) }}" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <td style="vertical-align: middle">Hutang</td>
-                                <td><input type="number" min="0" name="hutang" id="hutang" value="{{ $transaksi[0]->hutang }}" class="form-control text-right"></td>
+                                <td><input type="text" name="hutang" id="hutang" onkeyup="updateSisaHutangDP(this.value, '#sisa-hutang-temp', '#sisa-hutang', '#view-sisa-hutang')" value="{{ number_format($transaksi[0]->hutang, 0) }}" class="form-control text-right"></td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: middle">{{ ($transaksi[0]->jenis == 1) ? "Penjualan" : "Pembelian" }}</td>
+                                <td><input type="text" name="transaksi" id="transaksi" value="{{ number_format($transaksi[0]->transaksi, 0) }}" class="form-control text-right"></td>
                             </tr>
                             <tr>
                                 <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Pembayaran</th>
-                                <td><input type="number" min="0" name="sisa" id="sisa" value="{{ $transaksi[0]->sisa }}" readonly class="form-control text-right"></td>
+                                <td>
+                                    <input type="text" name="view_sisa" id="view-sisa" value="{{ number_format($transaksi[0]->sisa, 0) }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa" id="sisa" value="{{ $transaksi[0]->sisa }}" readonly class="form-control text-right">
+                                </td>
+                            </tr>
+                            <tr @if ($transaksi[0]->jenis == 2) style="opacity: 0; position: absolute;" @endif>
+                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang {{ ($transaksi[0]->jenis == 1) ? "Seller" : "Buyer" }}</th>
+                                <td>
+                                    <input type="text" name="view_sisa_hutang" id="view-sisa-hutang" value="{{ number_format($transaksi[0]->sisa_hutang, 0) }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_hutang" id="sisa-hutang" value="{{ $transaksi[0]->sisa_hutang }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_hutang_temp" id="sisa-hutang-temp">
+                                </td>
                             </tr>
                             <tr>
-                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa Hutang</th>
+                                <th class="text-center" style="vertical-align: middle" colspan="4">Sisa DP {{ ($transaksi[0]->jenis == 1) ? "Seller" : "Buyer" }}</th>
                                 <td>
-                                    <input type="number" min="0" name="sisa_hutang" id="sisa-hutang" value="{{ $transaksi[0]->sisa_hutang }}" readonly class="form-control text-right">
-                                    <input type="hidden" min="0" name="sisa_hutang_temp" id="sisa-hutang-temp">
+                                    <input type="text" name="view_sisa_dp" id="view-sisa-dp" value="{{ number_format($transaksi[0]->sisa_dp, 0) }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_dp" id="sisa-dp" value="{{ $transaksi[0]->sisa_dp }}" readonly class="form-control text-right">
+                                    <input type="hidden" name="sisa_dp_temp" id="sisa-dp-temp">
                                 </td>
                             </tr>
                         </tfoot>
