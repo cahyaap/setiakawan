@@ -23,6 +23,20 @@ class StokOpnameController extends Controller
         ]);
     }
 
+    public function setStok(Request $request)
+    {
+        $stok_opname_id = $request->input('stok_opname_id');
+        $stokOpnames = StokOpname::with(['detail'])->where('id', $stok_opname_id)->get();
+        foreach($stokOpnames[0]->detail as $stok){
+            $barang = Barang::find($stok->barang_id);
+            $barang->stok = $stok->stok_real;
+            $barang->save();
+        }
+        StokOpname::where('id', $stok_opname_id)->update(['status' => 1]);
+
+        return redirect()->route('stok-opname.index');
+    }
+
     public function getStokOpname()
     {
         $data = [];
@@ -33,7 +47,7 @@ class StokOpnameController extends Controller
             $stokReal = $item->detail()->sum('stok_real');
             $selisih = $stokReal - $stokWeb;
             array_push($data, [
-                date('Y-m-d h:i:s', strtotime($item->created_at)), number_format($stokWeb, 2), number_format($stokReal, 2), number_format($selisih, 2), ($item->ket) ? $item->ket : "-", $item->id
+                date('Y-m-d h:i:s', strtotime($item->created_at)), number_format($stokWeb, 2), number_format($stokReal, 2), number_format($selisih, 2), ($item->ket) ? $item->ket : "-", $item->id, $item->status
             ]);
         }
 

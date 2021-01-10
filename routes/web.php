@@ -20,10 +20,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-hutang', 'HPController@getHutang')->name('get-hutang');
     Route::get('/get-hutang-by-seller', 'HPController@getHutangBySeller')->name('get-hutang-by-seller');
     Route::get('/get-karyawan', 'KaryawanController@getKaryawan')->name('get-karyawan');
+    Route::get('/get-rekap', 'RekapController@getRekap')->name('get-rekap');
     Route::get('/get-retur', 'ReturController@getRetur')->name('get-retur');
     Route::get('/get-seller', 'SellerController@getSeller')->name('get-seller');
     Route::get('/get-stok-opname', 'StokOpnameController@getStokOpname')->name('get-stok-opname');
     Route::get('/{id}/print', 'TransaksiController@generateInvoice')->name('transaksi.print');
+
+    Route::post('/stok-opname/set-stok-opname', 'StokOpnameController@setStok')->name('stok-opname.set-stok');
 
     Route::resource('absensi', 'AbsensiController');
     Route::resource('barang', 'BarangController');

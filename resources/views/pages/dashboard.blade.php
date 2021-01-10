@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-lg-12 col-sm-12 col-xs-12">
                 <div class="row">
-                    <div class="col-lg-3 col-sm-3 col-xs-12">
+                    <div class="col-lg-3">
                         <div class="white-box">
                             <h3 class="box-title">Stok Barang</h3>
                             <div class="text-right">
@@ -15,7 +15,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-3 col-xs-12">
+                    <div class="col-lg-3">
                         <div class="white-box">
                             <h3 class="box-title">Total Penjualan</h3>
                             <div class="text-right">
@@ -25,7 +25,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-3 col-xs-12">
+                    <div class="col-lg-3">
                         <div class="white-box">
                             <h3 class="box-title">Total Pembelian</h3>
                             <div class="text-right">
@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-sm-3 col-xs-12">
+                    <div class="col-lg-3">
                         <div class="white-box">
                             <h3 class="box-title">Total Pengeluaran</h3>
                             <div class="text-right">

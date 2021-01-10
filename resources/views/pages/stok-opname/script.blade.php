@@ -34,10 +34,12 @@
                     detailRoute = detailRoute.replace('stok_opname_id', row[5]);
                     var editRoute = "{{ route('stok-opname.edit', 'stok_opname_id') }}";
                     editRoute = editRoute.replace('stok_opname_id', row[5]);
+                    var setStokBtn = (row[6] == "1") ? "btn-default" : "btn-success";
+                    var setStok = "<a class='btn btn-sm "+setStokBtn+" aksi-btn detail-btn' alt='Set Stock' data-aksi='set-stok' title='Set Stock' href='#setStok' data-id='"+row[5]+"' data-tanggal='"+row[0]+"' data-target='#setStok' data-toggle='modal'><span><i class='fa fa-refresh'></i></span></a>";
                     var detail = "<a class='btn btn-sm btn-info aksi-btn detail-btn' alt='Detail' title='Detail' href='"+detailRoute+"'><span><i class='fa fa-search-plus'></i></span></a>";
                     var edit = "<a class='btn btn-sm btn-warning aksi-btn edit-btn' alt='Edit' title='Edit' href='"+editRoute+"'><span><i class='fa fa-pencil'></i></span></a>";
                     var hapus = "<a class='btn btn-sm btn-danger aksi-btn hapus-btn' alt='Hapus' title='Hapus' href='#hapusStokOpname' data-aksi='hapus' data-tanggal='"+row[0]+"' data-id='"+row[5]+"' data-toggle='modal' data-target='#hapusStokOpname'><span><i class='fa fa-trash'></i></span></a>";
-                    return detail + " " + edit + " " + hapus
+                    return setStok + " " + detail + " " + edit + " " + hapus
                 }
             }
         ];
@@ -73,6 +75,11 @@
             var stok_opname_id = _this.data('id');
             var aksi = _this.data('aksi');
             var route = "";
+            if(aksi === "set-stok"){
+                var tanggal = _this.data('tanggal');
+                $('.tanggal-stok-opname').html(tanggal);
+                $('#stok_opname_id').val(stok_opname_id);
+            }
             if(aksi === "detail"){
                 route = "{{ route('stok-opname.show', 'stok_opname_id') }}";
                 route = route.replace('stok_opname_id', stok_opname_id);

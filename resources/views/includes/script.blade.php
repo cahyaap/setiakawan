@@ -79,12 +79,17 @@
         if(order){
             orderColumn = order;
         }
+        $(element).empty();
         $('.load-content').show();
         $.ajax({
             url: route,
             data: params,
             success: function(res){
                 $('.load-content').hide();
+                if ($.fn.DataTable.isDataTable(element)) {
+                    $(element).DataTable().clear().draw();
+                    $(element).DataTable().destroy();
+                }
                 var tableCreated = $(element).DataTable({
                     data: res.data,
                     order: orderColumn,

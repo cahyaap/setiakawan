@@ -15,6 +15,7 @@ class CreateStokOpnamesTable extends Migration
     {
         Schema::create('stok_opnames', function (Blueprint $table) {
             $table->id();
+            $table->string('status')->default(0);
             $table->string('ket')->nullable();
             $table->timestamps();
         });
