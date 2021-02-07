@@ -76,9 +76,9 @@
                     <div class="form-group">
                         <label for="tahun-mingguan">Tahun</label>
                         <select name="tahun" id="tahun-mingguan" class="form-control">
-                            @for ($i = $tahun; $i > $tahun - 3; $i--)
-                            <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
+                            @foreach ($years as $item)
+                            <option value="{{ $item->year }}">{{ $item->year }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

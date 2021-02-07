@@ -6,9 +6,34 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaksi;
 
+use DateTime;
+
 class RekapController extends Controller
 {
     private $title = "Setia Kawan | Rekap";
+    protected $monthArray = [
+        "01" => "Januari",
+        "02" => "Februari",
+        "03" => "Maret",
+        "04" => "April",
+        "05" => "Mei",
+        "06" => "Juni",
+        "07" => "Juli",
+        "08" => "Agustus",
+        "09" => "September",
+        "10" => "Oktober",
+        "11" => "November",
+        "12" => "Desember"
+    ];
+    protected $dayArray = [
+        "sunday" => "Minggu",
+        "monday" => "Senin",
+        "tuesday" => "Selasa",
+        "wednesday" => "Rabu",
+        "thursday" => "Kamis",
+        "friday" => "Jum'at",
+        "saturday" => "Sabtu"
+    ];
 
     /**
      * Display a listing of the resource.
@@ -18,7 +43,8 @@ class RekapController extends Controller
     public function index()
     {
         return view('pages.rekap.index')->with([
-            'title' => $this->title
+            'title' => $this->title,
+            'years' => DB::select(DB::raw("SELECT YEAR(created_at) as year FROM transaksis GROUP BY year"))
         ]);
     }
 
@@ -30,7 +56,7 @@ class RekapController extends Controller
     public static function getWeeksOfMonth($currentMonth, $currentYear)
     {
         $time = strtotime("$currentYear-$currentMonth-01");  
-        $firstWeek = date("W", $time);
+        $firstWeek = (int) date("W", $time);
 
         if ($currentMonth == 12) {
             $currentMonth = "01";
@@ -40,21 +66,29 @@ class RekapController extends Controller
         }
 
         $time = strtotime("$currentYear-$currentMonth-01") - 86400;
-        $lastWeek = date("W", $time);
+        $lastWeek = (int) date("W", $time);
 
         $weekArr = array();
 
         $j = 1;
         for ($i = $firstWeek; $i <= $lastWeek; $i++) {
-            $weekArr[$i] = $j;
+            $weekArr[$j] = $i;
             $j++;
         }
         return $weekArr;
     }
+
+    function getStartAndEndDate($week, $year) {
+        $dto = new DateTime();
+        $dto->setISODate($year, $week);
+        $ret['week_start'] = $dto->format('Y-m-d')." 00:00:00";
+        $dto->modify('+6 days');
+        $ret['week_end'] = $dto->format('Y-m-d')." 23:59:59";
+        return $ret;
+    }
       
     public function getRekap(Request $request)
     {
-        $data = $params = [];
         $rekap = $request->input('rekap');
         $jenis = $request->input('jenis');
         if($rekap == "harian"){
@@ -67,44 +101,63 @@ class RekapController extends Controller
             $params['minggu'] = $request->input('minggu');
             $params['bulan_m'] = $request->input('bulan_m');
             $params['tahun_m'] = $request->input('tahun_m');
-            // rekap mingguan rabu -> selasa
-            // hari ini
-            $date = date('Y-m-d', strtotime(now()));
-            $today = date('l', strtotime(now()));
-            // last rabu = hari ini rabu ? hari ini : last rabu
-            $lastRabu = ($today == "Wednesday") ? $date : date('Y-m-d', strtotime('last wednesday'));
-            // next selasa = hari ini selasa ? hari ini : next selasa
-            $nextSelasa = ($today == "Tuesday") ? $date : date('Y-m-d', strtotime('next tuesday'));
 
-            $transaksis = Transaksi::with(['seller', 'detail' => function($query) {
-                $query->select(DB::raw('SUM(harga*berat) as total'), DB::raw('SUM(berat) as berat'), 'transaksi_id')->groupBy('transaksi_id');
-            }])->where('jenis', $jenis)->where('created_at', 'like', '%'.$request->input('tanggal').'%')->orderBy('id', 'desc')->get();
+            $weekOfMonth = $this->getWeeksOfMonth($params['bulan_m'], $params['tahun_m']);
+            $dateOfWeek = $this->getStartAndEndDate($weekOfMonth[$params['minggu']], $params['tahun_m']);
+
+            $tanggalStart = $dateOfWeek['week_start'];
+            $tanggalEnd = $dateOfWeek['week_end'];
+
+            $transaksis = DB::select(DB::raw("SELECT t.tanggal, SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, dr.* FROM transaksis t INNER JOIN (SELECT SUM(harga*berat) as total, SUM(berat) as berat, d.tanggal FROM detail_transaksis d WHERE d.jenis = '$jenis' GROUP BY d.tanggal) dr ON t.tanggal = dr.tanggal WHERE t.jenis = '$jenis' AND t.tanggal BETWEEN '$tanggalStart' AND '$tanggalEnd' GROUP BY t.tanggal"));
         }
         if($rekap == "bulanan"){
             $params['bulan_b'] = $request->input('bulan_b');
             $params['tahun_b'] = $request->input('tahun_b');
-            $bulanan = $request->input('tahun_b')."-".$request->input('bulan_b');
-            $transaksis = Transaksi::with(['seller', 'detail' => function($query) {
-                $query->select(DB::raw('SUM(harga*berat) as total'), DB::raw('SUM(berat) as berat'), 'transaksi_id')->groupBy('transaksi_id');
-            }])->where('jenis', $jenis)->where('created_at', 'like', '%'.$bulanan.'%')->orderBy('id', 'desc')->get();
+
+            $weekOfMonth = $this->getWeeksOfMonth($params['bulan_b'], $params['tahun_b']);
+
+            $transaksis = [];
+            foreach($weekOfMonth as $key => $value){
+                $dateOfWeek = $this->getStartAndEndDate($value, $params['tahun_b']);
+                $tanggalStart = $dateOfWeek['week_start'];
+                $tanggalEnd = $dateOfWeek['week_end'];
+                $week = $this->convertWeekNumberToString($key);
+                $transaksis[$week] = DB::select(DB::raw("SELECT SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, SUM(berat) as berat FROM (SELECT t.jenis, SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, dr.* FROM transaksis t INNER JOIN (SELECT SUM(harga*berat) as total, SUM(berat) as berat, d.tanggal FROM detail_transaksis d WHERE d.jenis = '$jenis' GROUP BY d.tanggal) dr ON t.tanggal = dr.tanggal WHERE t.jenis = '$jenis' AND t.tanggal BETWEEN '$tanggalStart' AND '$tanggalEnd' GROUP BY t.tanggal) result GROUP BY jenis"));
+            }
         }
-
-        // $nomor = 1;
-        // foreach($transaksis as $item){
-        //     array_push($data, [
-        //         $nomor++, $item->seller->name, $item->detail[0]->berat, $item->kas, $item->tf, 0, $item->dp, $item->hutang, $item->sisa_dp, $item->sisa_hutang, $item->id
-        //     ]);
-        // }
-
-        // return response()->json([
-        //     'data' => $data
-        // ]);
 
         return view("pages.rekap.$rekap")->with([
             'transaksis' => $transaksis,
             'jenis' => $jenis,
-            'params' => $params
+            'params' => $params,
+            'dayArray' => $this->dayArray,
+            'monthArray' => $this->monthArray
         ]);
+    }
+
+    public function convertWeekNumberToString($number){
+        switch($number):
+            case $number == 1:
+                $return = "PERTAMA";        
+                break;
+            case $number == 2:
+                $return = "KEDUA";        
+                break;
+            case $number == 3:
+                $return = "KETIGA";        
+                break;
+            case $number == 4:
+                $return = "KEEMPAT";        
+                break;
+            case $number == 5:
+                $return = "KELIMA";        
+                break;
+            default:
+                $return = null;
+                break;
+        endswitch;
+
+        return $return;
     }
 
     /**
@@ -114,7 +167,8 @@ class RekapController extends Controller
      */
     public function create()
     {
-        //
+        // dd($this->getWeeksOfMonth(2, 2021));
+        dd($this->getStartAndEndDate(5, 2021));
     }
 
     /**

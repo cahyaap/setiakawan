@@ -1,6 +1,9 @@
 <div class="row">
     <div class="col-md-12 text-center">
-        <h3 class="box-title">REKAP MINGGUAN</h3>
+        <h3 class="box-title">
+            REKAP MINGGUAN<br>
+            MINGGU KE-{{ $params['minggu'] }} {{ $monthArray[$params['bulan_m']] }} {{ $params['tahun_m'] }}
+        </h3>
     </div>
 </div>
 <div class="row">
@@ -27,10 +30,17 @@
                     $tonase = $kas = $tf = $dp = $hutang = $transaksi = 0;
                 @endphp
                 @foreach ($transaksis as $item)
+                @php
+                    $created_at = strtotime($item->tanggal);
+                    $day = $dayArray[strtolower(date('l', $created_at))];
+                    $date = date('d', $created_at);
+                    $month = $monthArray[strtolower(date('m', $created_at))];
+                    $year = date('Y', $created_at);
+                @endphp
                 <tr>
                     <td class="text-center">{{ $nomor++ }}</td>
-                    <td>{{ $item->seller->name }}</td>
-                    <td class="text-right">{{ number_format($item->detail[0]->berat, 2) }}</td>
+                    <td>{{ $day }}, {{ $date." ".$month." ".$year }}</td>
+                    <td class="text-right">{{ number_format($item->berat, 2) }}</td>
                     <td class="text-right">{{ number_format($item->kas, 0) }}</td>
                     <td class="text-right">{{ number_format($item->tf, 0) }}</td>
                     <td class="text-right">{{ number_format($item->dp, 0) }}</td>

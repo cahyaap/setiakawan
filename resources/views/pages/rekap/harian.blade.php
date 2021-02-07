@@ -1,6 +1,12 @@
+@php
+    $tanggal = strtotime($params['tanggal']);
+@endphp
 <div class="row">
     <div class="col-md-12 text-center">
-        <h3 class="box-title">REKAP HARIAN<br>{{ date('l, d F Y', strtotime($params['tanggal'])) }}</h3>
+        <h3 class="box-title">
+            REKAP HARIAN<br>
+            {{ $dayArray[strtolower(date('l', $tanggal))] }}, {{ date('d', $tanggal) }} {{ $monthArray[date('m', $tanggal)] }} {{ date('Y', $tanggal) }}
+        </h3>
     </div>
 </div>
 <div class="row">

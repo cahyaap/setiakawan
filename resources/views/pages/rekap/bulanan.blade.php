@@ -1,6 +1,9 @@
 <div class="row">
     <div class="col-md-12 text-center">
-        <h3 class="box-title">REKAP BULANAN</h3>
+        <h3 class="box-title">
+            REKAP BULANAN<br>
+            {{ $monthArray[$params['bulan_b']] }} {{ $params['tahun_b'] }}
+        </h3>
     </div>
 </div>
 <div class="row">
@@ -26,25 +29,27 @@
                     $nomor = 1;
                     $tonase = $kas = $tf = $dp = $hutang = $transaksi = 0;
                 @endphp
-                @foreach ($transaksis as $item)
-                <tr>
-                    <td class="text-center">{{ $nomor++ }}</td>
-                    <td>{{ $item->seller->name }}</td>
-                    <td class="text-right">{{ number_format($item->detail[0]->berat, 2) }}</td>
-                    <td class="text-right">{{ number_format($item->kas, 0) }}</td>
-                    <td class="text-right">{{ number_format($item->tf, 0) }}</td>
-                    <td class="text-right">{{ number_format($item->dp, 0) }}</td>
-                    <td class="text-right">{{ number_format($item->hutang, 0) }}</td>
-                    <td class="text-right">{{ number_format($item->transaksi, 0) }}</td>
-                </tr>
-                @php
-                    $tonase += $item->berat;
-                    $kas += $item->kas;
-                    $tf += $item->tf;
-                    $dp += $item->dp;
-                    $hutang += $item->hutang;
-                    $transaksi += $item->transaksi;
-                @endphp
+                @foreach ($transaksis as $key => $items)
+                    @foreach ($items as $item)
+                    <tr>
+                        <td class="text-center">{{ $nomor++ }}</td>
+                        <td>{{ $key }}</td>
+                        <td class="text-right">{{ number_format($item->berat, 2) }}</td>
+                        <td class="text-right">{{ number_format($item->kas, 0) }}</td>
+                        <td class="text-right">{{ number_format($item->tf, 0) }}</td>
+                        <td class="text-right">{{ number_format($item->dp, 0) }}</td>
+                        <td class="text-right">{{ number_format($item->hutang, 0) }}</td>
+                        <td class="text-right">{{ number_format($item->transaksi, 0) }}</td>
+                    </tr>
+                    @php
+                        $tonase += $item->berat;
+                        $kas += $item->kas;
+                        $tf += $item->tf;
+                        $dp += $item->dp;
+                        $hutang += $item->hutang;
+                        $transaksi += $item->transaksi;
+                    @endphp
+                    @endforeach
                 @endforeach
             </tbody>
             <tfoot>

@@ -104,7 +104,9 @@
         // rekap harian -> jenis, tanggal
         $('#tanggal').on('change', function(){
             params['tanggal'] = $(this).val();
-            getRekap("#rekap-container", params);
+            if(params['tanggal'] !== ""){
+                getRekap("#rekap-container", params);
+            }
         });
 
         // rekap mingguan -> jenis, bulan, tahun, minggu
