@@ -68,13 +68,13 @@
                         <td class="text-right">{{ number_format($item->berat, 2) }}</td>
                         <td class="text-center">
                             <input type="hidden" name="detail_transaksi_id[]" id="detail-transaksi-id-{{ $item->id }}" value="{{ $item->id }}">
-                            <input type="number" step="0.01" name="retur[]" id="retur-{{ $item->id }}" min="0" placeholder="Jumlah retur" value="{{ $retur }}">
+                            <input type="number" step="0.01" name="retur[]" id="retur-{{ $item->id }}" min="0" value="{{ $retur }}">
                             <input type="hidden" name="harga[]" id="harga-{{ $item->id }}" value="{{ $item->harga }}">
                             <input type="hidden" name="berat[]" id="berat-{{ $item->id }}" value="{{ $item->berat }}">
                             <input type="hidden" name="temp_laba[]" id="temp-laba-{{ $item->id }}" value="{{ $laba }}">
                         </td>
                         <td class="text-center">
-                            <input type="number" step="0.01" name="potongan[]" id="potongan-{{ $item->id }}" min="0" value="{{ $potongan }}" placeholder="Jumlah potongan">
+                            <input type="number" step="0.01" name="potongan[]" id="potongan-{{ $item->id }}" min="0" value="{{ $potongan }}">
                         </td>
                         <td class="text-right">{{ number_format($item->harga, 0) }}</td>
                         <td class="text-right">{{ number_format($item->barang->stok, 2) }}</td>
@@ -87,15 +87,15 @@
                         <td class="text-right">{{ number_format($transaksi->sisa_dp, 0) }}</td>
                         <td class="text-right">{{ number_format($transaksi->sisa_hutang, 0) }}</td>
                         <td class="text-center">
-                            <input class="hpp" type="text" name="hpp[]" data-id="{{ $item->id }}" id="hpp-{{ $item->id }}" min="0" placeholder="Nominal HPP" value="{{ ($hpp) ? number_format($hpp, 0) : '' }}">
+                            <input class="hpp" type="text" name="hpp[]" data-id="{{ $item->id }}" id="hpp-{{ $item->id }}" min="0" value="{{ ($hpp) ? number_format($hpp, 0) : '' }}">
                         </td>
                         <td class="text-center">
-                            <input class="kurleb-tonase" data-id="{{ $item->id }}" type="number" step="0.01" name="kurleb_tonase[]" id="kurleb-tonase-{{ $item->id }}" min="0" placeholder="Lebih kurang tonase" value="{{ $kurleb }}">
+                            <input class="kurleb-tonase" data-id="{{ $item->id }}" type="number" step="0.01" name="kurleb_tonase[]" id="kurleb-tonase-{{ $item->id }}" min="0" value="{{ $kurleb }}">
                         </td>
                         <td class="text-center" id="laba-{{ $item->id }}">
                             <span class='btn btn-success'>{{ number_format($laba, 0) }}</span></td>
                         <td class="text-left">
-                            <textarea name="keterangan[]" id="keterangan-{{ $item->id }}" placeholder="Keterangan">{{ $keterangan }}</textarea>
+                            <textarea name="keterangan[]" id="keterangan-{{ $item->id }}">{{ $keterangan }}</textarea>
                         </td>
                         <td class="text-center">
                             <span id="spin-{{ $item->id }}" style="display: none;"><i class="fa fa-spin fa-spinner"></i></span>
