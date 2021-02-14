@@ -6,7 +6,7 @@
         <span class="nama-barang-alert" id="nama-barang-{{ $rowId }}-alert"></span>
         <datalist id="nama-barang-{{ $rowId }}">
             @foreach ($barangs as $item)
-            <option data-id="{{ $item->id }}" value="{{ $item->name }}">
+            <option data-id="{{ $item->id }}" value="{{ $item->kode }}">
             @endforeach
         </datalist>
     </td>

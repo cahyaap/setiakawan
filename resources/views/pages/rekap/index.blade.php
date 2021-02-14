@@ -1,5 +1,30 @@
 @extends('layouts.default')
 
+<style type="text/css">
+    .table-responsive::-webkit-scrollbar {
+        -webkit-appearance: none;
+    }
+
+    .table-responsive::-webkit-scrollbar:vertical {
+        width: 12px;
+    }
+
+    .table-responsive::-webkit-scrollbar:horizontal {
+        height: 12px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, .5);
+        border-radius: 10px;
+        border: 2px solid #ffffff;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        border-radius: 10px;  
+        background-color: #ffffff; 
+    }
+</style>
+
 @section('content')
 <div class="animated fadeIn row">
     <div class="col-sm-12">
@@ -10,6 +35,9 @@
                 </div>
             </div>
             <hr>
+
+            <form id="form-filter">
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -25,8 +53,8 @@
                     <div class="form-group">
                         <label for="jenis">Jenis Transaksi</label>
                         <select name="jenis" id="jenis" class="form-control">
-                            <option value="1">Pembelian</option>
                             <option value="2">Penjualan</option>
+                            <option value="1">Pembelian</option>
                         </select>
                     </div>
                 </div>
@@ -53,7 +81,19 @@
             </div>
 
             <div class="row rekap-filter" id="rekap-mingguan" style="display: none;">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="minggu">Minggu ke</label>
+                        <select name="minggu" id="minggu" class="form-control">
+                            <option value="1" @if ($week == 1) selected @endif>1</option>
+                            <option value="2" @if ($week == 2) selected @endif>2</option>
+                            <option value="3" @if ($week == 3) selected @endif>3</option>
+                            <option value="4" @if ($week == 4) selected @endif>4</option>
+                            <option value="5" @if ($week == 5) selected @endif>5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="bulan-mingguan">Bulan</label>
                         <select name="bulan" id="bulan-mingguan" class="form-control">
@@ -72,25 +112,13 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="tahun-mingguan">Tahun</label>
                         <select name="tahun" id="tahun-mingguan" class="form-control">
                             @foreach ($years as $item)
                             <option value="{{ $item->year }}">{{ $item->year }}</option>
                             @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="minggu">Minggu ke</label>
-                        <select name="minggu" id="minggu" class="form-control">
-                            <option value="1" @if ($week == 1) selected @endif>1</option>
-                            <option value="2" @if ($week == 2) selected @endif>2</option>
-                            <option value="3" @if ($week == 3) selected @endif>3</option>
-                            <option value="4" @if ($week == 4) selected @endif>4</option>
-                            <option value="5" @if ($week == 5) selected @endif>5</option>
                         </select>
                     </div>
                 </div>
@@ -128,16 +156,19 @@
                 </div>
             </div>
 
-            {{-- <div class="row">
+            <div class="row">
                 <div class="col-md-12">
                     <div class="form-group text-center">
-                        <button type="button" id="lihat-rekap" class="btn btn-primary">Lihat Rekap</button>
+                        <button id="lihat-rekap" class="btn btn-primary">Lihat Rekap</button>
                     </div>
                 </div>
-            </div> --}}
+            </div>
+        
+            </form>
+
             <hr>
             <div class="row" id="data-tabel">
-                <div class="col-md-12 table-responsive">
+                <div class="col-md-12">
                     <div class="load-content text-center">Memuat data... <span><i class="fa fa-spinner fa-spin"></i></span></div>
                     <div id="rekap-container">
                         <table id="tabel-rekap" class="display" cellspacing="0" width="100%"></table>

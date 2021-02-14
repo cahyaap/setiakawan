@@ -70,7 +70,7 @@
                                     <span class="nama-barang-alert" id="nama-barang-{{ $i }}-alert">Stok saat ini: <strong>{{ $detail->barang->stok }} kg</strong></span>
                                     <datalist id="nama-barang-{{ $i }}">
                                         @foreach ($barangs as $item)
-                                        <option data-id="{{ $item->id }}" value="{{ $item->name }}">
+                                        <option data-id="{{ $item->id }}" value="{{ $item->kode }}">
                                         @endforeach
                                     </datalist>
                                 </td>
@@ -158,7 +158,7 @@
                 </div>
                 <div class="form-group text-center">
                     <button type="button" class="btn btn-default waves-effect batal-bon-button" data-transaksi="transaksi" id="batal-bon-transaksi">Batal</button>
-                    <button class="btn btn-warning waves-effect" id="update-bon-button">Update Bon <span class="jenis-transaksi-text"></span></button>
+                    <button class="btn btn-warning waves-effect" id="buat-bon-button">Update Bon <span class="jenis-transaksi-text"></span></button>
                 </div>
             </div>
         </div>

@@ -98,7 +98,8 @@ class TransaksiController extends Controller
                 'sisa' => (empty($request->input('sisa'))) ? 0 : $request->input('sisa'),
                 'sisa_hutang' => (empty($request->input('sisa_hutang'))) ? 0 : $request->input('sisa_hutang'),
                 'sisa_dp' => (empty($request->input('sisa_dp'))) ? 0 : $request->input('sisa_dp'),
-                'ket' => $request->input('ket')
+                'ket' => $request->input('ket'),
+                'tanggal' => date('Y-m-d', now())
             ];
 
             // check seller
@@ -151,6 +152,7 @@ class TransaksiController extends Controller
                         'harga' => str_replace(",", "", $hargas[$i]),
                         'berat' => $berats[$i],
                         'jenis' => $transaksi['jenis'],
+                        'tanggal' => date('Y-m-d', now()),
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -407,8 +409,11 @@ class TransaksiController extends Controller
     {
         $profil = Profile::all();
         $transaksi = Transaksi::with(['seller', 'detail.barang'])->where('id', $id)->get();
+        $jenis = ($transaksi[0]->jenis == 1) ? "Pembelian" : "Penjualan";
+        $kode = $transaksi[0]->kode;
+        $nama = $transaksi[0]->seller->name;
         $pdf = PDF::loadView('pages.transaksi.print', compact('transaksi', 'profil'))->setPaper('envelope dl', 'potrait');
-        return $pdf->stream();
+        return $pdf->stream("$kode - Bon $jenis $nama.pdf");
     }
 
     public function dataBon(Request $request)

@@ -9,7 +9,7 @@
         </h3>
     </div>
 </div>
-<div class="row">
+<div class="row table-responsive">
     <div class="col-md-12">
         <table id="tabel-rekap" class="display" cellspacing="0" width="100%">
             <thead>

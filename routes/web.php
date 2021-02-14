@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/get-hutang-by-seller', 'HPController@getHutangBySeller')->name('get-hutang-by-seller');
     Route::get('/get-karyawan', 'KaryawanController@getKaryawan')->name('get-karyawan');
     Route::get('/get-rekap', 'RekapController@getRekap')->name('get-rekap');
+    Route::get('/get-rekap-penjualan', 'RekapController@getRekapPenjualan')->name('get-rekap-penjualan');
     Route::get('/get-retur', 'ReturController@getRetur')->name('get-retur');
     Route::get('/get-seller', 'SellerController@getSeller')->name('get-seller');
     Route::get('/get-stok-opname', 'StokOpnameController@getStokOpname')->name('get-stok-opname');

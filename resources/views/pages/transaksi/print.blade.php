@@ -39,25 +39,31 @@
                 margin: 30px; 
                 font-size: 10px;
             }
-            .bon-header tr td {
-                font-size: 12px;
+            * {
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
             }
             table {
                 width: 100%;
             }
             .print-header-logo {
-                width: 20%;
+                width: 25%;
                 display: inline-block;
-                vertical-align: top;
+                vertical-align: middle;
+                position: relative;
+                padding-top: 10px;
+                transform: scaleY(1.25);
             }
             .print-header-text {
-                width: 78%;
+                width: 73%;
                 display: inline-block;
                 vertical-align: top;
             }
             .print-header-logo img {
                 width: 100%;
             }
+            /* .detail th, .detail td {
+                font-family: 'Times New Roman', Times, serif;
+            } */
         </style>
     </head>
     <body>
@@ -70,10 +76,13 @@
                     <div class="print-header-text">
                         <table>
                             <tr>
-                                <td align="center" style="font-size: 16px;">{{ $profil[0]->nama_perusahaan }}</td>
+                                <td align="center" style="font-size: 15px;">{{ $profil[0]->nama_perusahaan }}</td>
                             </tr>
                             <tr>
                                 <td align="center" style="font-size: 10px;">{{ $profil[0]->deskripsi_1 }}<br>{{ $profil[0]->deskripsi_2 }}</td>
+                            </tr>
+                            <tr>
+                                <td align="center" style="font-size: 7px;">{{ $profil[0]->alamat }}</td>
                             </tr>
                         </table>
                     </div>
@@ -119,7 +128,7 @@
                     </div>
                     <div>
                         <br>
-                        <table>
+                        <table class="detail">
                             <thead>
                                 <tr>
                                     <th align="center">Nama</th>

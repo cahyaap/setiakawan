@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 
 use DateTime;
 
@@ -85,6 +86,64 @@ class RekapController extends Controller
         $dto->modify('+6 days');
         $ret['week_end'] = $dto->format('Y-m-d')." 23:59:59";
         return $ret;
+    }
+
+    public function getRekapPenjualan(Request $request)
+    {
+        $rekap = $request->input('rekap');
+        $jenis = $request->input('jenis');
+
+        $query = "";
+
+        if($rekap == "harian"){
+            $params['tanggal'] = $request->input('tanggal');
+            $transaksis = Transaksi::with(['seller', 'detail.barang'])
+                                    ->where('jenis', $jenis)
+                                    ->where('created_at', 'like', '%'.$request->input('tanggal').'%')
+                                    ->orderBy('id', 'desc')
+                                    ->get();
+        }
+        if($rekap == "mingguan"){
+            $params['minggu'] = $request->input('minggu');
+            $params['bulan_m'] = $request->input('bulan_m');
+            $params['tahun_m'] = $request->input('tahun_m');
+
+            $weekOfMonth = $this->getWeeksOfMonth($params['bulan_m'], $params['tahun_m']);
+            $dateOfWeek = $this->getStartAndEndDate($weekOfMonth[$params['minggu']], $params['tahun_m']);
+
+            $tanggalStart = $dateOfWeek['week_start'];
+            $tanggalEnd = $dateOfWeek['week_end'];
+
+            $query = "SELECT t.tanggal, SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, dr.* FROM transaksis t INNER JOIN (SELECT SUM(harga*berat) as total, SUM(berat) as berat, SUM(laba) as laba, GROUP_CONCAT(keterangan separator ', ') as keterangan, d.tanggal FROM detail_transaksis d WHERE d.jenis = '$jenis' GROUP BY d.tanggal) dr ON t.tanggal = dr.tanggal WHERE t.jenis = '$jenis' AND t.tanggal BETWEEN '$tanggalStart' AND '$tanggalEnd' GROUP BY t.tanggal";
+
+            $transaksis = DB::select(DB::raw($query));
+        }
+        if($rekap == "bulanan"){
+            $params['bulan_b'] = $request->input('bulan_b');
+            $params['tahun_b'] = $request->input('tahun_b');
+
+            $weekOfMonth = $this->getWeeksOfMonth($params['bulan_b'], $params['tahun_b']);
+
+            $transaksis = [];
+            foreach($weekOfMonth as $key => $value){
+                $dateOfWeek = $this->getStartAndEndDate($value, $params['tahun_b']);
+                $tanggalStart = $dateOfWeek['week_start'];
+                $tanggalEnd = $dateOfWeek['week_end'];
+                $week = $this->convertWeekNumberToString($key);
+
+                $query = "SELECT SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, SUM(berat) as berat, SUM(laba) as laba, GROUP_CONCAT(keterangan separator ', ') as keterangan FROM (SELECT t.jenis, SUM(kas) as kas, SUM(tf) as tf, SUM(dp) as dp, SUM(hutang) as hutang, SUM(transaksi) as transaksi, dr.* FROM transaksis t INNER JOIN (SELECT SUM(harga*berat) as total, SUM(berat) as berat, SUM(laba) as laba, GROUP_CONCAT(keterangan separator ', ') as keterangan, d.tanggal FROM detail_transaksis d WHERE d.jenis = '$jenis' GROUP BY d.tanggal) dr ON t.tanggal = dr.tanggal WHERE t.jenis = '$jenis' AND t.tanggal BETWEEN '$tanggalStart' AND '$tanggalEnd' GROUP BY t.tanggal) result GROUP BY jenis";
+
+                $transaksis[$week] = DB::select(DB::raw($query));
+            }
+        }
+
+        return view("pages.rekap.$rekap-penjualan")->with([
+            'transaksis' => $transaksis,
+            'jenis' => $jenis,
+            'params' => $params,
+            'dayArray' => $this->dayArray,
+            'monthArray' => $this->monthArray
+        ]);
     }
       
     public function getRekap(Request $request)
@@ -168,7 +227,7 @@ class RekapController extends Controller
     public function create()
     {
         // dd($this->getWeeksOfMonth(2, 2021));
-        dd($this->getStartAndEndDate(5, 2021));
+        // dd($this->getStartAndEndDate(5, 2021));
     }
 
     /**
@@ -179,7 +238,21 @@ class RekapController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $id = $request->id;
+        $data = [
+            "hpp" => trim($request->hpp),
+            "lebih_kurang" => trim($request->kurleb),
+            "potongan" => trim($request->potongan),
+            "retur" => trim($request->retur),
+            "laba" => trim($request->laba),
+            "keterangan" => (trim($request->keterangan) !== "") ? trim($request->keterangan) : null
+        ];
+
+        $updateDetailTransaksi = DetailTransaksi::where('id', $id)->update($data);
+
+        return response()->json([
+            "updateDetailTransaksi" => $updateDetailTransaksi
+        ]);
     }
 
     /**

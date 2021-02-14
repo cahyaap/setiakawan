@@ -14,7 +14,7 @@ class AddTanggalToTransaksisTable extends Migration
     public function up()
     {
         Schema::table('transaksis', function (Blueprint $table) {
-            $table->date('tanggal')->default(now());
+            $table->date('tanggal')->after('id')->default(now());
         });
     }
 

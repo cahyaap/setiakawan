@@ -51,6 +51,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.4.0/min/dropzone.min.css">
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
+
+<link href="{{ asset('css/buttons.dataTables.min.css') }}" rel="stylesheet" />
+
 <style type="text/css">
     .for_mobile {
         display: none;

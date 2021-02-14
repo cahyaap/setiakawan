@@ -9,6 +9,7 @@
     <title>{{ $title }}</title>
     <meta name="description" content="Shayna Admin Panel">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <link rel="icon" href="{{ public_path('logo-sk.jpeg') }}">
     {{-- style --}}
     @stack('before-style')
