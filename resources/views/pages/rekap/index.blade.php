@@ -30,6 +30,18 @@
     <div class="col-sm-12">
         <div class="white-box">
             <div class="row">
+                @if (count($notRekap) > 0)
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <h4 class="box-title">Ada transaksi penjualan yang belum di rekap pada tanggal:</h4>
+                        <ul>
+                            @foreach ($notRekap as $key => $value)
+                            <li>{{ date('d F Y', strtotime($value)) }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                @endif
                 <div class="col-md-12">
                     <h3 class="box-title" style="margin-top: 10px;margin-bottom: -10px">Rekap <span id="jenis-rekap"></span></h3>
                 </div>
@@ -165,7 +177,6 @@
             </div>
         
             </form>
-
             <hr>
             <div class="row" id="data-tabel">
                 <div class="col-md-12">

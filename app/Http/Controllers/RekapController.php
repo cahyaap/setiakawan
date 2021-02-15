@@ -43,9 +43,11 @@ class RekapController extends Controller
      */
     public function index()
     {
+        $notRekap = DetailTransaksi::select('tanggal')->where('tanggal', '<=', date('Y-m-d', strtotime(now())))->where('jenis', 2)->whereNull('hpp')->groupBy('tanggal')->pluck('tanggal');
         return view('pages.rekap.index')->with([
             'title' => $this->title,
-            'years' => DB::select(DB::raw("SELECT YEAR(created_at) as year FROM transaksis GROUP BY year"))
+            'years' => DB::select(DB::raw("SELECT YEAR(created_at) as year FROM transaksis GROUP BY year")),
+            'notRekap' => $notRekap
         ]);
     }
 
