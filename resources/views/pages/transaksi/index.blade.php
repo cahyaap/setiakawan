@@ -20,7 +20,7 @@
                     <button id="1" data-transaksi="pembelian" class="btn btn-primary transaksi-button">Bon Pembelian</button>
                     <button id="2" data-transaksi="penjualan" class="btn btn-warning transaksi-button">Bon Penjualan</button>
                     <button id="3" data-transaksi="pengeluaran" class="btn btn-default" data-toggle="modal" data-target="#modalPengeluaran">Pengeluaran lainnya</button>
-                    <a href="{{ route('retur.index') }}" class="btn btn-primary pull-right">Retur</a>
+                    <a href="{{ route('rekap.index') }}" class="btn btn-success pull-right">Rekap</a>
                 </div>
                 <div id="tambah-transaksi-box" class="col-md-12 transaksi-box">
                     <div class="load-content text-center">Memuat data... <span><i class="fa fa-spinner fa-spin"></i></span></div>
