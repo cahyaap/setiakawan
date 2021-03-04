@@ -23,15 +23,15 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('retur.index') }}" class="waves-effect">
-                    <i style="font-size: 16px;" class="fa fa-refresh fa-fw" data-icon="v"></i>
-                    <span class="hide-menu"> Retur</span>
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('rekap.index') }}" class="waves-effect">
                     <i style="font-size: 16px;" class="fa fa-book fa-fw" data-icon="v"></i>
                     <span class="hide-menu"> Rekap</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('retur.index') }}" class="waves-effect">
+                    <i style="font-size: 16px;" class="fa fa-refresh fa-fw" data-icon="v"></i>
+                    <span class="hide-menu"> Retur</span>
                 </a>
             </li>
             <li>

@@ -39,7 +39,41 @@
             }
         ];
 
-        getTableData("{{ route('get-retur') }}", "#tabel-retur", columns, null, [[1, "desc"]]);
+        var columns2 = [
+            {
+                title: "Tanggal",
+                className: 'text-center'
+            },
+            { 
+                title: "Kode Transaksi",
+                className: 'text-center',
+                render: function(data, type, row){
+                    return "<a class='aksi-btn detail-btn' alt='Detail' title='Detail' href='#detailTransaksi' data-aksi='detail-transaksi' data-transaksi-id='"+row[5][1]+"' data-jenis='"+row[5][2]+"' data-toggle='modal' data-target='#detailTransaksi'>"+row[1]+"</a>";
+                }
+            },
+            {
+                title: "Buyer"
+            },
+            {
+                title: "Nama Barang"
+            },
+            {
+                title: "Tonase (kg)",
+                className: 'text-right'
+            },
+            {
+                title: "Aksi",
+                className: 'text-center',
+                render: function(data, type, row) {
+                    var detail = "<a class='btn btn-sm btn-info aksi-btn detail-btn' alt='Detail' title='Detail' href='#detailTransaksi' data-aksi='detail-transaksi' data-id='"+row[5][0]+"' data-transaksi-id='"+row[5][1]+"' data-jenis='"+row[5][2]+"' data-toggle='modal' data-target='#detailTransaksi'><span><i class='fa fa-search-plus'></i></span></a>";
+                    return detail
+                }
+            }
+        ];
+
+        // getTableData("{{ route('get-retur') }}", "#tabel-retur", columns, null, [[1, "desc"]]);
+
+        getTableData("{{ route('get-retur-2') }}", "#tabel-retur", columns2, null, [[1, "desc"]]);
 
         $(document).on('click', '.aksi-btn', function(){
             var _this = $(this);

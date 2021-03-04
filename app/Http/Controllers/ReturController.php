@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Retur;
 use App\Models\DetailRetur;
 use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,22 @@ class ReturController extends Controller
         foreach($returs as $item){
             array_push($data, [
                 date("m F Y", strtotime($item->created_at)), $item->kode, $item->transaksi->kode, $item->transaksi->seller->name, number_format($item->detail[0]->total, 0), $item->ket, [$item->id, $item->transaksi->id, $item->transaksi->jenis]
+            ]);
+        }
+
+        return response()->json([
+            'data' => $data
+        ]);
+    }
+
+    public function getReturNew()
+    {
+        $data = [];
+        $returs = DetailTransaksi::with(['transaksi.seller','barang'])->where('retur', '>', 0)->orderBy('id', 'desc')->get();
+
+        foreach($returs as $item){
+            array_push($data, [
+                date("m F Y", strtotime($item->created_at)), $item->transaksi->kode, $item->transaksi->seller->name, $item->barang->name, number_format($item->retur, 0),  [$item->id, $item->transaksi->id, $item->transaksi->jenis]
             ]);
         }
 

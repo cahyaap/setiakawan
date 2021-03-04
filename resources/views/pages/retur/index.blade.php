@@ -16,8 +16,8 @@
             <hr>
             <div class="row">
                 <div class="col-md-12 transaksi-button-list">
-                    <button id="1" data-transaksi="pembelian" class="btn btn-primary transaksi-button">Retur Pembelian</button>
-                    <button id="2" data-transaksi="penjualan" class="btn btn-warning transaksi-button">Retur Penjualan</button>
+                    {{-- <button id="1" data-transaksi="pembelian" class="btn btn-primary transaksi-button">Retur Pembelian</button>
+                    <button id="2" data-transaksi="penjualan" class="btn btn-warning transaksi-button">Retur Penjualan</button> --}}
                 </div>
                 <div id="tambah-transaksi-box" class="col-md-12 transaksi-box">
                     <div class="load-content text-center">Memuat data... <span><i class="fa fa-spinner fa-spin"></i></span></div>

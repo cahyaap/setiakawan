@@ -71,7 +71,7 @@
             <div>
                 <div class="print-header">
                     <div class="print-header-logo">
-                        <img src="{{ public_path('logo-sk.jpeg') }}">
+                        <img src="{{ public_path('logo-sk.png') }}">
                     </div>
                     <div class="print-header-text">
                         <table>
